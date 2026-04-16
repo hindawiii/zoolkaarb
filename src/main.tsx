@@ -4,11 +4,13 @@ import "./index.css";
 import { useUser } from "./store/userStore";
 
 // Apply persisted preferences before render
-const initialState = useUser.getState();
-if (initialState.darkMode) {
-  document.documentElement.classList.add("dark");
-}
-document.documentElement.dir = initialState.language === "ar" ? "rtl" : "ltr";
-document.documentElement.lang = initialState.language;
+const applyPrefs = (state: ReturnType<typeof useUser.getState>) => {
+  document.documentElement.classList.toggle("dark", state.darkMode);
+  document.documentElement.dir = state.language === "ar" ? "rtl" : "ltr";
+  document.documentElement.lang = state.language;
+};
+applyPrefs(useUser.getState());
+// Re-apply after persist rehydration + on every change
+useUser.subscribe(applyPrefs);
 
 createRoot(document.getElementById("root")!).render(<App />);

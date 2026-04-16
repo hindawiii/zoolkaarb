@@ -49,7 +49,7 @@ const AlWajib = () => {
             <button
               key={t.id}
               onClick={() => handleClick(t)}
-              className="rounded-2xl bg-card border border-border p-4 text-left active:scale-[0.97] transition-transform"
+              className="rounded-2xl bg-card border border-border p-4 text-start active:scale-[0.97] transition-transform"
             >
               <div className={`w-11 h-11 rounded-xl ${t.color} flex items-center justify-center mb-3`}>
                 <t.icon className={`w-5 h-5 ${t.iconColor}`} />

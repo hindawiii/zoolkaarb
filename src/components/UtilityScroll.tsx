@@ -64,8 +64,8 @@ const UtilityScroll = () => {
     "rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl shadow-sm p-3 active:scale-[0.97] transition-all hover:shadow-md hover:border-border";
 
   return (
-    <section className="px-5 mt-6" dir={isRtl ? "rtl" : "ltr"}>
-      <h3 className={`text-base font-semibold text-foreground mb-3 ${isRtl ? "text-right" : "text-left"}`}>
+    <section className="px-5 mt-6">
+      <h3 className="text-base font-semibold text-foreground mb-3 text-start">
         {t("section.utilities", language)}
       </h3>
 
@@ -78,7 +78,7 @@ const UtilityScroll = () => {
               onClick={item.action}
               className={`${baseCard} ${
                 isWide
-                  ? `col-span-2 flex items-center gap-3 ${isRtl ? "text-right" : "text-left"}`
+                  ? "col-span-2 flex items-center gap-3 text-start"
                   : "flex flex-col items-center justify-center text-center"
               }`}
             >

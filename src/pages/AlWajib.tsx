@@ -69,7 +69,7 @@ const AlWajib = () => {
             </div>
             <h3 className="text-lg font-bold font-cairo text-foreground">شاهد إعلان قصير</h3>
             <p className="text-sm text-muted-foreground mt-2 font-cairo" dir="rtl">
-              يا زول، شاهد إعلان قصير عشان تفتح قالب "{adTemplate.titleAr}" مجاناً.
+              يا غالي، شاهد إعلان قصير عشان تفتح قالب "{adTemplate.titleAr}" مجاناً.
             </p>
             <div className="flex gap-2 mt-5">
               <button onClick={() => setAdTemplate(null)} className="flex-1 px-4 py-2.5 rounded-full border border-border text-sm font-semibold active:scale-95 transition-transform">

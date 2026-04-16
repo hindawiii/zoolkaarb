@@ -86,7 +86,7 @@ const Settings = () => {
               </button>
             </div>
           ) : (
-            <button onClick={() => { setTempName(name); setEditingName(true); }} className="text-left w-full">
+            <button onClick={() => { setTempName(name); setEditingName(true); }} className="text-start w-full">
               <p className="text-sm font-bold font-cairo text-foreground truncate">{name}</p>
               <p className="text-[11px] text-muted-foreground">{t("settings.editName", language)}</p>
             </button>
@@ -119,7 +119,7 @@ const Settings = () => {
             </div>
           </div>
 
-          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors">
+          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-3 px-4 py-3.5 text-start active:bg-muted/50 transition-colors">
             <Moon className="w-4 h-4 text-muted-foreground" />
             <div className="flex-1">
               <p className="text-sm text-foreground">{t("settings.dark", language)}</p>
@@ -130,7 +130,7 @@ const Settings = () => {
             </div>
           </button>
 
-          <button onClick={handleNotificationsToggle} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors">
+          <button onClick={handleNotificationsToggle} className="w-full flex items-center gap-3 px-4 py-3.5 text-start active:bg-muted/50 transition-colors">
             <Bell className="w-4 h-4 text-muted-foreground" />
             <div className="flex-1">
               <p className="text-sm text-foreground">{t("settings.notifications", language)}</p>
@@ -154,7 +154,7 @@ const Settings = () => {
             <button
               key={item.labelAr}
               onClick={() => setShowOverlay(true)}
-              className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3.5 text-start active:bg-muted/50 transition-colors"
             >
               <item.icon className="w-4 h-4 text-muted-foreground" />
               <div className="flex-1">

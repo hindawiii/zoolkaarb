@@ -37,7 +37,7 @@ const services = [
     icon: Share2,
     gradient: "from-sand-dark to-sand",
     iconBg: "bg-sand-dark/20",
-    route: null,
+    route: "/zool-share",
   },
 ];
 

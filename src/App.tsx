@@ -9,6 +9,9 @@ import Studio from "./pages/Studio.tsx";
 import Settings from "./pages/Settings.tsx";
 import AlWajib from "./pages/AlWajib.tsx";
 import TemplateEditor from "./pages/TemplateEditor.tsx";
+import DataSaver from "./pages/DataSaver.tsx";
+import ZoolShare from "./pages/ZoolShare.tsx";
+import Scanner from "./pages/Scanner.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -26,6 +29,9 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           <Route path="/al-wajib" element={<AlWajib />} />
           <Route path="/al-wajib/editor/:id" element={<TemplateEditor />} />
+          <Route path="/data-saver" element={<DataSaver />} />
+          <Route path="/zool-share" element={<ZoolShare />} />
+          <Route path="/scanner" element={<Scanner />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

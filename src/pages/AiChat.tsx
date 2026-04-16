@@ -1,29 +1,41 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Loader2, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import avatarImg from "@/assets/wad-al-halal-avatar.png";
+import { Category } from "@/lib/places";
+import { useUser } from "@/store/userStore";
 
 interface Message {
   id: number;
   role: "user" | "assistant";
   content: string;
+  action?: { type: "directory"; category: Category; label: string };
 }
-
-const defaultMessages: Message[] = [
-  {
-    id: 1,
-    role: "assistant",
-    content:
-      "حبابك عشرة يا زول! 👋 أنا ود الحلال، مساعدك الذكي السوداني. اسألني أي حاجة عن التطبيق أو أي شي تاني وأبشر!\n\nHello! I'm Wad Al-Halal, your Sudanese AI assistant. Ask me anything!",
-  },
-];
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/wad-chat`;
 
+// Detect directory intent from the user message
+const detectDirectoryIntent = (text: string): { category: Category; label: string } | null => {
+  const t = text.toLowerCase();
+  if (/(صيدلي|pharmac)/i.test(text)) return { category: "pharmacy", label: "افتح أقرب الصيدليات" };
+  if (/(مستشف|hospital|clinic|عياد)/i.test(text)) return { category: "hospital", label: "افتح أقرب المستشفيات" };
+  if (/(مطعم|restaurant|food|أكل|اكل)/i.test(text)) return { category: "restaurant", label: "افتح أقرب المطاعم" };
+  if (/(خدم|service|atm|صراف)/i.test(text)) return { category: "service", label: "افتح أقرب مراكز الخدمة" };
+  if (/(قريب|أقرب|اقرب|nearest|near me)/i.test(t)) return { category: "pharmacy", label: "افتح الزول يفتش" };
+  return null;
+};
+
 const AiChat = () => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>(defaultMessages);
+  const { name } = useUser();
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 1,
+      role: "assistant",
+      content: `حبابك عشرة يا ${name}! 👋 أنا ود الحلال. اسألني عن أي أداة، أو قول لي "أقرب صيدلية فاتحة وين؟" وأنا أوديك على طول.\n\nHello! Ask me anything.`,
+    },
+  ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -37,6 +49,7 @@ const AiChat = () => {
     if (!text || isLoading) return;
 
     const userMsg: Message = { id: Date.now(), role: "user", content: text };
+    const intent = detectDirectoryIntent(text);
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
@@ -55,20 +68,19 @@ const AiChat = () => {
       });
 
       if (!resp.ok || !resp.body) {
-        if (resp.status === 429) {
-          toast.error("في زحمة، جرب تاني بعد شوية يا زول.");
-        } else if (resp.status === 402) {
-          toast.error("الرصيد خلص. ضيف كريديتات من إعدادات Lovable AI.");
-        } else {
-          toast.error("ما قدرت أرد عليك الآن.");
-        }
+        if (resp.status === 429) toast.error("في زحمة، جرب تاني بعد شوية يا زول.");
+        else if (resp.status === 402) toast.error("الرصيد خلص. ضيف كريديتات من إعدادات Lovable AI.");
+        else toast.error("ما قدرت أرد عليك الآن.");
         setIsLoading(false);
         return;
       }
 
       const assistantId = Date.now() + 1;
       let assistantSoFar = "";
-      setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "" }]);
+      setMessages((prev) => [
+        ...prev,
+        { id: assistantId, role: "assistant", content: "", action: intent ? { type: "directory", ...intent } : undefined },
+      ]);
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -84,17 +96,14 @@ const AiChat = () => {
         while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
           let line = textBuffer.slice(0, newlineIndex);
           textBuffer = textBuffer.slice(newlineIndex + 1);
-
           if (line.endsWith("\r")) line = line.slice(0, -1);
           if (line.startsWith(":") || line.trim() === "") continue;
           if (!line.startsWith("data: ")) continue;
-
           const jsonStr = line.slice(6).trim();
           if (jsonStr === "[DONE]") {
             streamDone = true;
             break;
           }
-
           try {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
@@ -120,13 +129,8 @@ const AiChat = () => {
 
   return (
     <div className="min-h-screen bg-background max-w-md mx-auto flex flex-col">
-      {/* Header */}
       <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-10">
-        <button
-          onClick={() => navigate("/")}
-          className="p-1.5 rounded-xl hover:bg-muted transition-colors"
-          aria-label="Back"
-        >
+        <button onClick={() => navigate("/")} className="p-1.5 rounded-xl hover:bg-muted transition-colors" aria-label="Back">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
         <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-gold">
@@ -138,13 +142,9 @@ const AiChat = () => {
         </div>
       </header>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+          <div key={msg.id} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
             <div
               className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-line font-cairo ${
                 msg.role === "user"
@@ -152,16 +152,22 @@ const AiChat = () => {
                   : "bg-card border border-border text-foreground rounded-bl-md"
               }`}
             >
-              {msg.content || (
-                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-              )}
+              {msg.content || <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
             </div>
+            {msg.action?.type === "directory" && msg.content && (
+              <button
+                onClick={() => navigate(`/yafatish?category=${msg.action!.category}`)}
+                className="mt-2 px-4 py-2 rounded-full bg-card border border-border text-xs font-semibold flex items-center gap-1.5 active:scale-95 transition-transform hover:bg-muted"
+              >
+                <MapPin className="w-3.5 h-3.5 text-gold" />
+                <span className="font-cairo">{msg.action.label}</span>
+              </button>
+            )}
           </div>
         ))}
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
       <div className="px-4 py-3 border-t border-border bg-card/80 backdrop-blur-xl sticky bottom-0">
         <div className="flex items-center gap-2">
           <input

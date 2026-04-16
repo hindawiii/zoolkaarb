@@ -8,6 +8,7 @@ import AiChat from "./pages/AiChat.tsx";
 import Studio from "./pages/Studio.tsx";
 import Settings from "./pages/Settings.tsx";
 import AlWajib from "./pages/AlWajib.tsx";
+import TemplateEditor from "./pages/TemplateEditor.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/studio" element={<Studio />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/al-wajib" element={<AlWajib />} />
+          <Route path="/al-wajib/editor/:id" element={<TemplateEditor />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

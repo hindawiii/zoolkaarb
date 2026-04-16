@@ -51,7 +51,7 @@ const ServiceGrid = () => {
           <button
             key={service.titleAr}
             onClick={() => service.route ? navigate(service.route) : setShowOverlay(true)}
-            className="rounded-2xl bg-card border border-border p-4 text-left active:scale-[0.97] transition-transform hover:glow-gold"
+            className="rounded-2xl bg-card border border-border p-4 text-start active:scale-[0.97] transition-transform hover:glow-gold"
           >
             <div
               className={`w-11 h-11 rounded-xl ${service.iconBg} flex items-center justify-center mb-3`}

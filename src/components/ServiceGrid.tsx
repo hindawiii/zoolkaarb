@@ -19,7 +19,7 @@ const ServiceGrid = () => {
       route: "/studio",
     },
     {
-      titleAr: "الواجب",
+      titleAr: "مصمم حالات",
       desc: t("svc.wajib.desc", language),
       icon: Heart,
       iconBg: "bg-nile/20",

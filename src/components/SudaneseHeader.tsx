@@ -22,8 +22,8 @@ const SudaneseHeader = () => {
     <header className="px-5 pt-6 pb-3" dir={isRtl ? "rtl" : "ltr"}>
       <div className={`flex items-center ${isRtl ? "justify-end text-right" : "justify-start text-left"}`}>
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            ZoolKaarb
+          <h1 className="text-2xl font-bold text-foreground tracking-tight font-cairo">
+            {isRtl ? "زول كـــــارب" : "ZoolKaarb"}
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5 font-cairo">
             {isRtl ? arGreeting : enGreeting}

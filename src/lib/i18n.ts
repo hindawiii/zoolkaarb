@@ -20,7 +20,7 @@ export const dict: Dict = {
 
   // Service descriptions
   "svc.studio.desc": { ar: "تعديل الصور بالذكاء الاصطناعي", en: "AI Image Processing" },
-  "svc.wajib.desc": { ar: "قوالب وتهاني", en: "Templates & Greetings" },
+  "svc.wajib.desc": { ar: "قوالب وتهاني واتس وفيس", en: "WhatsApp & Facebook templates" },
   "svc.recorder.title": { ar: "المسجل الذكي", en: "Smart Recorder" },
   "svc.recorder.desc": { ar: "تسجيل وتغيير الصوت", en: "Record & Voice Changer" },
   "svc.share.title": { ar: "زول شير", en: "Zool Share" },

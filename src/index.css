@@ -113,6 +113,16 @@
     line-height: 1.8;
   }
 
+  /* Mirror back-arrow icons in RTL so they always point "back" visually */
+  [dir="rtl"] .lucide-arrow-left,
+  [dir="rtl"] .lucide-chevron-left {
+    transform: scaleX(-1);
+  }
+  [dir="rtl"] .lucide-arrow-right,
+  [dir="rtl"] .lucide-chevron-right {
+    transform: scaleX(-1);
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Tajawal', sans-serif;
     font-weight: 700;

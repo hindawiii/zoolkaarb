@@ -1,74 +1,66 @@
 import { MapPin, FileDown, Gift, Share2, ScanLine } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-
-type Utility = {
-  title: string;
-  titleAr: string;
-  desc: string;
-  icon: typeof MapPin;
-  color: string;
-  bg: string;
-  route: string | null;
-  span: "wide" | "square";
-};
-
-const utilities: Utility[] = [
-  {
-    title: "Data Saver",
-    titleAr: "موفر البيانات",
-    desc: "Compress images & files",
-    icon: FileDown,
-    color: "text-gold",
-    bg: "bg-gold/15",
-    route: "/data-saver",
-    span: "wide",
-  },
-  {
-    title: "Scanner",
-    titleAr: "ماسح المستندات",
-    desc: "Scan documents to PDF",
-    icon: ScanLine,
-    color: "text-nile",
-    bg: "bg-nile/15",
-    route: "/scanner",
-    span: "wide",
-  },
-  {
-    title: "Al-Zool Yafatish",
-    titleAr: "الزول يفتش",
-    desc: "Find places near you",
-    icon: MapPin,
-    color: "text-nile",
-    bg: "bg-nile-light",
-    route: "/yafatish",
-    span: "square",
-  },
-  {
-    title: "Zool Share",
-    titleAr: "شير زول",
-    desc: "Share via WhatsApp",
-    icon: Share2,
-    color: "text-sand-dark",
-    bg: "bg-sand-dark/20",
-    route: "/zool-share",
-    span: "square",
-  },
-  {
-    title: "Rewarded Ads",
-    titleAr: "إعلانات مكافأة",
-    desc: "Unlock premium",
-    icon: Gift,
-    color: "text-earth-light",
-    bg: "bg-sand",
-    route: null,
-    span: "square",
-  },
-];
+import { useUser } from "@/store/userStore";
+import { t } from "@/lib/i18n";
 
 const UtilityScroll = () => {
   const navigate = useNavigate();
+  const { language } = useUser();
   const [showOverlay, setShowOverlay] = useState(false);
+
+  const utilities = [
+    {
+      title: t("util.dataSaver.title", language),
+      titleAr: "موفّر البيانات",
+      desc: t("util.dataSaver.desc", language),
+      icon: FileDown,
+      color: "text-gold",
+      bg: "bg-gold/15",
+      route: "/data-saver",
+      span: "wide" as const,
+    },
+    {
+      title: t("util.scanner.title", language),
+      titleAr: "مسح المستندات",
+      desc: t("util.scanner.desc", language),
+      icon: ScanLine,
+      color: "text-nile",
+      bg: "bg-nile/15",
+      route: "/scanner",
+      span: "square" as const,
+    },
+    {
+      title: t("util.yafatish.title", language),
+      titleAr: "الزول يفتش",
+      desc: t("util.yafatish.desc", language),
+      icon: MapPin,
+      color: "text-nile",
+      bg: "bg-nile-light",
+      route: "/yafatish",
+      span: "square" as const,
+    },
+    {
+      title: t("util.share.title", language),
+      titleAr: "زول شير",
+      desc: t("util.share.desc", language),
+      icon: Share2,
+      color: "text-sand-dark",
+      bg: "bg-sand-dark/20",
+      route: "/zool-share",
+      span: "square" as const,
+    },
+    {
+      title: t("util.rewards.title", language),
+      titleAr: "إعلانات مكافأة",
+      desc: t("util.rewards.desc", language),
+      icon: Gift,
+      color: "text-earth-light",
+      bg: "bg-sand",
+      route: null,
+      span: "square" as const,
+    },
+  ];
 
   const baseCard =
     "rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl shadow-sm p-3 text-left active:scale-[0.97] transition-all hover:shadow-md hover:border-border";
@@ -76,7 +68,7 @@ const UtilityScroll = () => {
   return (
     <section className="px-5 mt-6">
       <h3 className="text-base font-semibold text-foreground mb-3">
-        Utilities
+        {t("section.utilities", language)}
       </h3>
 
       <div className="grid grid-cols-2 gap-3 auto-rows-[110px]">

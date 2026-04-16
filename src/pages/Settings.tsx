@@ -1,7 +1,9 @@
 import { ArrowLeft, User, Globe, Moon, Bell, Shield, Info, ChevronRight, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useUser } from "@/store/userStore";
+import { t } from "@/lib/i18n";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -10,14 +12,46 @@ const Settings = () => {
   const [tempName, setTempName] = useState(name);
   const [showOverlay, setShowOverlay] = useState(false);
 
-  // Apply dark mode on mount
+  // Apply dark mode on mount + whenever toggled
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
   const saveName = () => {
-    setName(tempName.trim() || "يا زول");
+    setName(tempName.trim() || "صديقي");
     setEditingName(false);
+  };
+
+  const handleNotificationsToggle = async () => {
+    // Turning OFF
+    if (notifications) {
+      setNotifications(false);
+      toast.success(t("toast.notifOff", language));
+      return;
+    }
+    // Turning ON — request browser permission
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      toast.error(language === "ar" ? "متصفحك ما بدعم الإشعارات." : "Your browser doesn't support notifications.");
+      return;
+    }
+    try {
+      let perm = Notification.permission;
+      if (perm === "default") perm = await Notification.requestPermission();
+      if (perm === "granted") {
+        setNotifications(true);
+        toast.success(t("toast.notifEnabled", language), { duration: 4000 });
+        try {
+          new Notification("ZoolKaarb", {
+            body: language === "ar" ? "أبشر، التنبيهات الكاربة حتصلك أول بأول 🇸🇩" : "Notifications enabled!",
+          });
+        } catch { /* notification may fail silently on some browsers */ }
+      } else {
+        toast.error(t("toast.notifDenied", language));
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error(t("toast.notifDenied", language));
+    }
   };
 
   return (
@@ -27,8 +61,8 @@ const Settings = () => {
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
         <div>
-          <h1 className="text-base font-bold font-cairo text-foreground">الإعدادات</h1>
-          <p className="text-[10px] text-muted-foreground">Settings</p>
+          <h1 className="text-base font-bold font-cairo text-foreground">{t("settings.title", "ar")}</h1>
+          <p className="text-[10px] text-muted-foreground">{t("settings.title", "en")}</p>
         </div>
       </header>
 
@@ -54,20 +88,20 @@ const Settings = () => {
           ) : (
             <button onClick={() => { setTempName(name); setEditingName(true); }} className="text-left w-full">
               <p className="text-sm font-bold font-cairo text-foreground truncate">{name}</p>
-              <p className="text-[11px] text-muted-foreground">Tap to edit your name</p>
+              <p className="text-[11px] text-muted-foreground">{t("settings.editName", language)}</p>
             </button>
           )}
         </div>
       </div>
 
-      {/* Account */}
+      {/* Preferences */}
       <div className="mt-5 px-5">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Preferences</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t("settings.preferences", language)}</p>
         <div className="rounded-2xl bg-card border border-border overflow-hidden divide-y divide-border">
           <div className="w-full flex items-center gap-3 px-4 py-3.5">
             <Globe className="w-4 h-4 text-muted-foreground" />
             <div className="flex-1">
-              <p className="text-sm text-foreground">Language</p>
+              <p className="text-sm text-foreground">{t("settings.language", language)}</p>
               <p className="text-[10px] font-cairo text-earth-light" dir="rtl">اللغة</p>
             </div>
             <div className="flex rounded-full bg-muted p-0.5">
@@ -88,7 +122,7 @@ const Settings = () => {
           <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors">
             <Moon className="w-4 h-4 text-muted-foreground" />
             <div className="flex-1">
-              <p className="text-sm text-foreground">Dark Mode</p>
+              <p className="text-sm text-foreground">{t("settings.dark", language)}</p>
               <p className="text-[10px] font-cairo text-earth-light" dir="rtl">الوضع الداكن</p>
             </div>
             <div className={`w-10 h-6 rounded-full transition-colors ${darkMode ? "bg-primary" : "bg-muted"} relative`}>
@@ -96,10 +130,10 @@ const Settings = () => {
             </div>
           </button>
 
-          <button onClick={() => setNotifications(!notifications)} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors">
+          <button onClick={handleNotificationsToggle} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors">
             <Bell className="w-4 h-4 text-muted-foreground" />
             <div className="flex-1">
-              <p className="text-sm text-foreground">Notifications</p>
+              <p className="text-sm text-foreground">{t("settings.notifications", language)}</p>
               <p className="text-[10px] font-cairo text-earth-light" dir="rtl">الإشعارات</p>
             </div>
             <div className={`w-10 h-6 rounded-full transition-colors ${notifications ? "bg-primary" : "bg-muted"} relative`}>
@@ -111,14 +145,14 @@ const Settings = () => {
 
       {/* General */}
       <div className="mt-5 px-5">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">General</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t("settings.general", language)}</p>
         <div className="rounded-2xl bg-card border border-border overflow-hidden divide-y divide-border">
           {[
-            { label: "Privacy Policy", labelAr: "سياسة الخصوصية", icon: Shield },
-            { label: "About ZoolKaarb", labelAr: "عن زول كارب", icon: Info },
+            { label: t("settings.privacy", language), labelAr: "سياسة الخصوصية", icon: Shield },
+            { label: t("settings.about", language), labelAr: "عن زول كارب", icon: Info },
           ].map((item) => (
             <button
-              key={item.label}
+              key={item.labelAr}
               onClick={() => setShowOverlay(true)}
               className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors"
             >

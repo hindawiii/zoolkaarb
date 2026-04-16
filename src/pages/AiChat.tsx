@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import avatarImg from "@/assets/wad-al-halal-avatar.png";
 import { Category } from "@/lib/places";
 import { useUser } from "@/store/userStore";
+import { t } from "@/lib/i18n";
 
 interface Message {
   id: number;
@@ -28,12 +29,12 @@ const detectDirectoryIntent = (text: string): { category: Category; label: strin
 
 const AiChat = () => {
   const navigate = useNavigate();
-  const { name } = useUser();
+  const { name, language } = useUser();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       role: "assistant",
-      content: `حبابك عشرة يا ${name}! 👋 أنا ود الحلال. اسألني عن أي أداة، أو قول لي "أقرب صيدلية فاتحة وين؟" وأنا أوديك على طول.\n\nHello! Ask me anything.`,
+      content: `حبابك عشرة ${name}! 👋 أنا الخال. اسألني عن أي أداة، أو قول لي "أقرب صيدلية فاتحة وين؟" وأنا أوديك على طول.\n\nHello! I'm Al-Khal. Ask me anything.`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -68,7 +69,7 @@ const AiChat = () => {
       });
 
       if (!resp.ok || !resp.body) {
-        if (resp.status === 429) toast.error("في زحمة، جرب تاني بعد شوية يا زول.");
+        if (resp.status === 429) toast.error("في زحمة، جرب تاني بعد شوية يا غالي.");
         else if (resp.status === 402) toast.error("الرصيد خلص. ضيف كريديتات من إعدادات Lovable AI.");
         else toast.error("ما قدرت أرد عليك الآن.");
         setIsLoading(false);
@@ -121,7 +122,7 @@ const AiChat = () => {
       }
     } catch (err) {
       console.error("chat error:", err);
-      toast.error("في مشكلة في الاتصال يا زول.");
+      toast.error("في مشكلة في الاتصال يا غالي.");
     } finally {
       setIsLoading(false);
     }
@@ -134,11 +135,11 @@ const AiChat = () => {
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
         <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-gold">
-          <img src={avatarImg} alt="Wad Al-Halal" className="w-full h-full object-cover" />
+          <img src={avatarImg} alt="Al-Khal" className="w-full h-full object-cover" />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-bold font-cairo text-foreground">ود الحلال</p>
-          <p className="text-[10px] text-nile">{isLoading ? "بكتب..." : "Online"}</p>
+          <p className="text-sm font-bold font-cairo text-foreground">الخال</p>
+          <p className="text-[10px] text-nile">{isLoading ? t("chat.typing", language) : t("chat.online", language)}</p>
         </div>
       </header>
 
@@ -175,7 +176,7 @@ const AiChat = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             disabled={isLoading}
-            placeholder="اكتب رسالتك... Type a message..."
+            placeholder={language === "ar" ? "اكتب رسالتك..." : "Type a message..."}
             className="flex-1 h-11 rounded-full bg-muted border-0 px-4 text-sm font-cairo text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
           />
           <button

@@ -19,7 +19,7 @@ interface UserState {
 export const useUser = create<UserState>()(
   persist(
     (set) => ({
-      name: "يا زول",
+      name: "صديقي",
       language: "ar",
       darkMode: false,
       notifications: true,

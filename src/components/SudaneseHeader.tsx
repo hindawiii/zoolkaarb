@@ -1,18 +1,20 @@
 import { useMemo } from "react";
+import { useUser } from "@/store/userStore";
+import { t } from "@/lib/i18n";
 
 const SudaneseHeader = () => {
-  const greeting = useMemo(() => {
+  const { name, language } = useUser();
+
+  const greetingKey = useMemo(() => {
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) {
-      return { ar: "صباح الخير يا زول ☀️", en: "Good Morning, Zool!" };
-    } else if (hour >= 12 && hour < 17) {
-      return { ar: "نهارك سعيد يا زول 🌤", en: "Good Afternoon, Zool!" };
-    } else if (hour >= 17 && hour < 21) {
-      return { ar: "مساء الخير يا زول 🌙", en: "Good Evening, Zool!" };
-    } else {
-      return { ar: "ليلة سعيدة يا زول ✨", en: "Good Night, Zool!" };
-    }
+    if (hour >= 5 && hour < 12) return "greeting.morning";
+    if (hour >= 12 && hour < 17) return "greeting.afternoon";
+    if (hour >= 17 && hour < 21) return "greeting.evening";
+    return "greeting.night";
   }, []);
+
+  const arGreeting = `${t(greetingKey, "ar")}، ${name}`;
+  const enGreeting = `${t(greetingKey, "en")}, ${name}`;
 
   return (
     <header className="px-5 pt-6 pb-3">
@@ -21,10 +23,12 @@ const SudaneseHeader = () => {
           <h1 className="text-2xl font-bold font-cairo text-foreground tracking-tight">
             ZoolKaarb
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{greeting.en}</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {language === "en" ? enGreeting : enGreeting}
+          </p>
         </div>
         <p className="text-lg font-cairo text-earth-light" dir="rtl">
-          {greeting.ar}
+          {arGreeting}
         </p>
       </div>
     </header>

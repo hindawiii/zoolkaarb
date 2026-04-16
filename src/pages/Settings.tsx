@@ -1,38 +1,23 @@
-import { ArrowLeft, User, Globe, Moon, Bell, Shield, Info, ChevronRight } from "lucide-react";
+import { ArrowLeft, User, Globe, Moon, Bell, Shield, Info, ChevronRight, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-
-const settingsGroups = [
-  {
-    title: "Account",
-    items: [
-      { label: "Profile", labelAr: "الملف الشخصي", icon: User },
-      { label: "Language", labelAr: "اللغة", icon: Globe, value: "EN / عربي" },
-    ],
-  },
-  {
-    title: "Preferences",
-    items: [
-      { label: "Dark Mode", labelAr: "الوضع الداكن", icon: Moon, toggle: true },
-      { label: "Notifications", labelAr: "الإشعارات", icon: Bell, toggle: true },
-    ],
-  },
-  {
-    title: "General",
-    items: [
-      { label: "Privacy Policy", labelAr: "سياسة الخصوصية", icon: Shield },
-      { label: "About ZoolKaarb", labelAr: "عن زول كارب", icon: Info },
-    ],
-  },
-];
+import { useEffect, useState } from "react";
+import { useUser } from "@/store/userStore";
 
 const Settings = () => {
   const navigate = useNavigate();
-  const [toggles, setToggles] = useState<Record<string, boolean>>({ "Dark Mode": false, Notifications: true });
+  const { name, language, darkMode, notifications, setName, setLanguage, setDarkMode, setNotifications } = useUser();
+  const [editingName, setEditingName] = useState(false);
+  const [tempName, setTempName] = useState(name);
   const [showOverlay, setShowOverlay] = useState(false);
 
-  const handleToggle = (label: string) => {
-    setToggles((prev) => ({ ...prev, [label]: !prev[label] }));
+  // Apply dark mode on mount
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+  }, [darkMode]);
+
+  const saveName = () => {
+    setName(tempName.trim() || "يا زول");
+    setEditingName(false);
   };
 
   return (
@@ -52,56 +37,109 @@ const Settings = () => {
         <div className="w-14 h-14 rounded-full bg-gold/20 flex items-center justify-center">
           <User className="w-6 h-6 text-gold" />
         </div>
-        <div className="flex-1">
-          <p className="text-sm font-bold font-cairo text-foreground">يا زول</p>
-          <p className="text-[11px] text-muted-foreground">Guest User — Sign in for more features</p>
+        <div className="flex-1 min-w-0">
+          {editingName ? (
+            <div className="flex items-center gap-2">
+              <input
+                value={tempName}
+                onChange={(e) => setTempName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && saveName()}
+                autoFocus
+                className="flex-1 h-9 rounded-lg bg-card border border-border px-3 text-sm font-cairo text-foreground focus:outline-none focus:ring-2 focus:ring-gold/40"
+              />
+              <button onClick={saveName} className="p-2 rounded-lg gradient-gold text-primary-foreground active:scale-95">
+                <Check className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => { setTempName(name); setEditingName(true); }} className="text-left w-full">
+              <p className="text-sm font-bold font-cairo text-foreground truncate">{name}</p>
+              <p className="text-[11px] text-muted-foreground">Tap to edit your name</p>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Settings Groups */}
-      <div className="mt-5 space-y-5 px-5">
-        {settingsGroups.map((group) => (
-          <div key={group.title}>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{group.title}</p>
-            <div className="rounded-2xl bg-card border border-border overflow-hidden divide-y divide-border">
-              {group.items.map((item) => (
+      {/* Account */}
+      <div className="mt-5 px-5">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Preferences</p>
+        <div className="rounded-2xl bg-card border border-border overflow-hidden divide-y divide-border">
+          <div className="w-full flex items-center gap-3 px-4 py-3.5">
+            <Globe className="w-4 h-4 text-muted-foreground" />
+            <div className="flex-1">
+              <p className="text-sm text-foreground">Language</p>
+              <p className="text-[10px] font-cairo text-earth-light" dir="rtl">اللغة</p>
+            </div>
+            <div className="flex rounded-full bg-muted p-0.5">
+              {(["ar", "en"] as const).map((l) => (
                 <button
-                  key={item.label}
-                  onClick={() => {
-                    if (!item.toggle) setShowOverlay(true);
-                    else handleToggle(item.label);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors"
+                  key={l}
+                  onClick={() => setLanguage(l)}
+                  className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-colors ${
+                    language === l ? "gradient-gold text-primary-foreground" : "text-muted-foreground"
+                  }`}
                 >
-                  <item.icon className="w-4 h-4 text-muted-foreground" />
-                  <div className="flex-1">
-                    <p className="text-sm text-foreground">{item.label}</p>
-                    <p className="text-[10px] font-cairo text-earth-light" dir="rtl">{item.labelAr}</p>
-                  </div>
-                  {item.toggle ? (
-                    <div className={`w-10 h-6 rounded-full transition-colors ${toggles[item.label] ? "bg-primary" : "bg-muted"} relative`}>
-                      <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform ${toggles[item.label] ? "translate-x-[18px]" : "translate-x-0.5"}`} />
-                    </div>
-                  ) : item.value ? (
-                    <span className="text-xs text-muted-foreground">{item.value}</span>
-                  ) : (
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  )}
+                  {l === "ar" ? "عربي" : "EN"}
                 </button>
               ))}
             </div>
           </div>
-        ))}
+
+          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors">
+            <Moon className="w-4 h-4 text-muted-foreground" />
+            <div className="flex-1">
+              <p className="text-sm text-foreground">Dark Mode</p>
+              <p className="text-[10px] font-cairo text-earth-light" dir="rtl">الوضع الداكن</p>
+            </div>
+            <div className={`w-10 h-6 rounded-full transition-colors ${darkMode ? "bg-primary" : "bg-muted"} relative`}>
+              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform ${darkMode ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+            </div>
+          </button>
+
+          <button onClick={() => setNotifications(!notifications)} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors">
+            <Bell className="w-4 h-4 text-muted-foreground" />
+            <div className="flex-1">
+              <p className="text-sm text-foreground">Notifications</p>
+              <p className="text-[10px] font-cairo text-earth-light" dir="rtl">الإشعارات</p>
+            </div>
+            <div className={`w-10 h-6 rounded-full transition-colors ${notifications ? "bg-primary" : "bg-muted"} relative`}>
+              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform ${notifications ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* General */}
+      <div className="mt-5 px-5">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">General</p>
+        <div className="rounded-2xl bg-card border border-border overflow-hidden divide-y divide-border">
+          {[
+            { label: "Privacy Policy", labelAr: "سياسة الخصوصية", icon: Shield },
+            { label: "About ZoolKaarb", labelAr: "عن زول كارب", icon: Info },
+          ].map((item) => (
+            <button
+              key={item.label}
+              onClick={() => setShowOverlay(true)}
+              className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-muted/50 transition-colors"
+            >
+              <item.icon className="w-4 h-4 text-muted-foreground" />
+              <div className="flex-1">
+                <p className="text-sm text-foreground">{item.label}</p>
+                <p className="text-[10px] font-cairo text-earth-light" dir="rtl">{item.labelAr}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+          ))}
+        </div>
       </div>
 
       <p className="text-center text-[10px] text-muted-foreground mt-8">ZoolKaarb v1.0.0 — Made with ❤️ in Sudan</p>
 
-      {/* Coming Soon Overlay */}
       {showOverlay && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setShowOverlay(false)}>
           <div className="bg-card border border-border rounded-2xl p-8 mx-6 text-center" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold font-cairo text-foreground">قريباً!</h3>
-            <p className="text-sm text-muted-foreground mt-2">Coming Soon — This feature is under development.</p>
+            <p className="text-sm text-muted-foreground mt-2">Coming Soon — This page is under development.</p>
             <button onClick={() => setShowOverlay(false)} className="mt-5 px-6 py-2.5 rounded-full gradient-gold text-primary-foreground text-sm font-semibold active:scale-95 transition-transform">
               Got it!
             </button>

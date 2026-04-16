@@ -12,6 +12,7 @@ import TemplateEditor from "./pages/TemplateEditor.tsx";
 import DataSaver from "./pages/DataSaver.tsx";
 import ZoolShare from "./pages/ZoolShare.tsx";
 import Scanner from "./pages/Scanner.tsx";
+import ZoolYafatish from "./pages/ZoolYafatish.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/data-saver" element={<DataSaver />} />
           <Route path="/zool-share" element={<ZoolShare />} />
           <Route path="/scanner" element={<Scanner />} />
+          <Route path="/yafatish" element={<ZoolYafatish />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -10,7 +10,7 @@ const utilities = [
     icon: MapPin,
     color: "text-nile",
     bg: "bg-nile-light",
-    route: null,
+    route: "/yafatish",
   },
   {
     title: "Data Saver",

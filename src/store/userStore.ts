@@ -25,7 +25,13 @@ export const useUser = create<UserState>()(
       notifications: true,
       lastLocation: null,
       setName: (name) => set({ name }),
-      setLanguage: (language) => set({ language }),
+      setLanguage: (language) => {
+        set({ language });
+        if (typeof document !== "undefined") {
+          document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+          document.documentElement.lang = language;
+        }
+      },
       setDarkMode: (darkMode) => {
         set({ darkMode });
         if (typeof document !== "undefined") {

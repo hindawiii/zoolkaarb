@@ -6,10 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 const TEMPLATE_META: Record<string, { titleAr: string; defaultText: string; gradient: string }> = {
-  friday: { titleAr: "أدعية الجمعة", defaultText: "جمعة مباركة\nيا زول", gradient: "from-gold/40 via-sand to-gold/20" },
+  friday: { titleAr: "أدعية الجمعة", defaultText: "جمعة مباركة", gradient: "from-gold/40 via-sand to-gold/20" },
   morning: { titleAr: "أذكار الصباح", defaultText: "صباح الخير\nحبابك عشرة", gradient: "from-nile/40 via-sand to-nile/20" },
   evening: { titleAr: "أذكار المساء", defaultText: "مساء النور\nمساء الفل", gradient: "from-earth/40 via-sand to-earth/20" },
-  whatsapp: { titleAr: "حالات واتساب", defaultText: "أبشر يا زول", gradient: "from-sand-dark/40 via-sand to-gold/20" },
+  whatsapp: { titleAr: "حالات واتساب", defaultText: "أبشر يا غالي", gradient: "from-sand-dark/40 via-sand to-gold/20" },
   wedding: { titleAr: "بطاقات أعراس", defaultText: "مبروك العرس\nألف مبروك", gradient: "from-gold/50 via-sand to-gold/30" },
   custom: { titleAr: "قالب مخصص", defaultText: "اكتب رسالتك هنا", gradient: "from-nile/30 via-sand to-gold/30" },
 };
@@ -37,7 +37,7 @@ const TemplateEditor = () => {
 
   const handleRemoveBg = async () => {
     if (!imageUrl) {
-      toast({ title: "ارفع صورة الأول يا زول", description: "Pick an image first." });
+      toast({ title: "ارفع صورة الأول يا غالي", description: "Pick an image first." });
       return;
     }
     setRemovingBg(true);
@@ -48,7 +48,7 @@ const TemplateEditor = () => {
       if (error) throw error;
       if (data?.imageUrl) {
         setImageUrl(data.imageUrl);
-        toast({ title: "تمام!", description: "Background removed by Wad Al-Halal." });
+        toast({ title: "تمام!", description: "Background removed by Al-Khal." });
       } else {
         throw new Error(data?.error || "No image returned");
       }
@@ -154,7 +154,7 @@ const TemplateEditor = () => {
             className="rounded-2xl gradient-gold p-3 flex items-center justify-center gap-2 text-sm font-semibold text-primary-foreground active:scale-95 transition-transform disabled:opacity-60"
           >
             {removingBg ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            <span className="font-cairo">بلمسة ود الحلال</span>
+            <span className="font-cairo">بلمسة الخال</span>
           </button>
         </div>
 

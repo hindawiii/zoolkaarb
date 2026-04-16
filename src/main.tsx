@@ -3,9 +3,12 @@ import App from "./App.tsx";
 import "./index.css";
 import { useUser } from "./store/userStore";
 
-// Apply persisted dark mode before render
-if (useUser.getState().darkMode) {
+// Apply persisted preferences before render
+const initialState = useUser.getState();
+if (initialState.darkMode) {
   document.documentElement.classList.add("dark");
 }
+document.documentElement.dir = initialState.language === "ar" ? "rtl" : "ltr";
+document.documentElement.lang = initialState.language;
 
 createRoot(document.getElementById("root")!).render(<App />);

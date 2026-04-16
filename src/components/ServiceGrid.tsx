@@ -1,4 +1,6 @@
 import { ImagePlus, Heart, Mic2, Share2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const services = [
   {
@@ -8,6 +10,7 @@ const services = [
     icon: ImagePlus,
     gradient: "from-gold to-gold-glow",
     iconBg: "bg-gold/20",
+    route: "/studio",
   },
   {
     title: "Al-Wajib",
@@ -16,6 +19,7 @@ const services = [
     icon: Heart,
     gradient: "from-nile to-nile-light",
     iconBg: "bg-nile/20",
+    route: "/al-wajib",
   },
   {
     title: "Smart Recorder",
@@ -24,6 +28,7 @@ const services = [
     icon: Mic2,
     gradient: "from-earth-light to-earth",
     iconBg: "bg-earth/20",
+    route: null,
   },
   {
     title: "Zool Share",
@@ -32,10 +37,14 @@ const services = [
     icon: Share2,
     gradient: "from-sand-dark to-sand",
     iconBg: "bg-sand-dark/20",
+    route: null,
   },
 ];
 
 const ServiceGrid = () => {
+  const navigate = useNavigate();
+  const [showOverlay, setShowOverlay] = useState(false);
+
   return (
     <section className="px-5 mt-6">
       <h3 className="text-base font-semibold text-foreground mb-3">
@@ -45,6 +54,7 @@ const ServiceGrid = () => {
         {services.map((service) => (
           <button
             key={service.title}
+            onClick={() => service.route ? navigate(service.route) : setShowOverlay(true)}
             className="rounded-2xl bg-card border border-border p-4 text-left active:scale-[0.97] transition-transform hover:glow-gold"
           >
             <div
@@ -64,6 +74,18 @@ const ServiceGrid = () => {
           </button>
         ))}
       </div>
+
+      {showOverlay && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setShowOverlay(false)}>
+          <div className="bg-card border border-border rounded-2xl p-8 mx-6 text-center" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold font-cairo text-foreground">قريباً!</h3>
+            <p className="text-sm text-muted-foreground mt-2">Coming Soon — This feature is under development.</p>
+            <button onClick={() => setShowOverlay(false)} className="mt-5 px-6 py-2.5 rounded-full gradient-gold text-primary-foreground text-sm font-semibold active:scale-95 transition-transform">
+              Got it!
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

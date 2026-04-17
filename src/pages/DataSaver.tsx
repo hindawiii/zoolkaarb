@@ -62,6 +62,41 @@ const DataSaver = () => {
     a.click();
   };
 
+  const shareFile = async (network: "whatsapp" | "facebook") => {
+    if (!compressed) return;
+    const text =
+      network === "whatsapp"
+        ? "📲 مضغوطة بـ ZoolKaarb — توفير في الباقة!"
+        : "🌍 صورة مضغوطة من ZoolKaarb";
+
+    // Try Web Share API with file (best path — direct app share)
+    try {
+      const navAny = navigator as Navigator & {
+        canShare?: (data: ShareData) => boolean;
+      };
+      if (navAny.canShare && navAny.canShare({ files: [compressed] })) {
+        await navigator.share({ files: [compressed], text, title: "ZoolKaarb" });
+        return;
+      }
+    } catch {
+      /* fall through to deep link */
+    }
+
+    // Fallback: deep link to app (text only — file must be downloaded first)
+    if (network === "whatsapp") {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+    } else {
+      window.open(
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(text)}`,
+        "_blank",
+      );
+    }
+    toast({
+      title: "حمّل الصورة الأول",
+      description: "متصفحك ما بيدعم مشاركة الملف مباشرة — نزّل الصورة وارفعها في التطبيق.",
+    });
+  };
+
   const savedPct =
     original && compressed ? Math.max(0, Math.round((1 - compressed.size / original.size) * 100)) : 0;
 

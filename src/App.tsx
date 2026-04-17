@@ -14,6 +14,7 @@ import ZoolShare from "./pages/ZoolShare.tsx";
 import Scanner from "./pages/Scanner.tsx";
 import ZoolYafatish from "./pages/ZoolYafatish.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import VoiceNotesFAB from "./components/VoiceNotesFAB.tsx";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <VoiceNotesFAB />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

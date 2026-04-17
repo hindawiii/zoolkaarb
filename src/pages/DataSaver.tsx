@@ -1,4 +1,4 @@
-import { ArrowLeft, Upload, Download, Loader2, FileDown } from "lucide-react";
+import { ArrowLeft, Upload, Download, Loader2, FileDown, Share2, Facebook, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import imageCompression from "browser-image-compression";

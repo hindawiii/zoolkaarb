@@ -160,12 +160,41 @@ const DataSaver = () => {
         )}
 
         {compressed && !loading && (
-          <button
-            onClick={download}
-            className="w-full rounded-full gradient-gold text-primary-foreground py-3.5 font-semibold flex items-center justify-center gap-2 active:scale-95 transition-transform"
-          >
-            <Download className="w-4 h-4" /> Download Compressed
-          </button>
+          <>
+            <div className="rounded-2xl bg-gradient-to-br from-gold/15 via-card to-nile/10 border border-gold/30 p-4 flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl gradient-gold flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <p className="text-xs font-cairo text-foreground leading-relaxed" dir="rtl">
+                الباقة غالية.. ضغطنا ليك الصورة دي عشان تطير في الواتساب بلمحة بصر — وفّرت{" "}
+                <span className="font-bold text-nile">{savedPct}%</span> من حجمها.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => shareFile("whatsapp")}
+                className="rounded-2xl bg-[hsl(142_70%_45%)] text-white py-3.5 font-semibold flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform shadow-md"
+              >
+                <Share2 className="w-5 h-5" />
+                <span className="text-xs font-cairo" dir="rtl">مشاركة فورية للواتساب</span>
+              </button>
+              <button
+                onClick={() => shareFile("facebook")}
+                className="rounded-2xl bg-[hsl(220_70%_50%)] text-white py-3.5 font-semibold flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform shadow-md"
+              >
+                <Facebook className="w-5 h-5" />
+                <span className="text-xs font-cairo" dir="rtl">نشر على فيسبوك</span>
+              </button>
+            </div>
+
+            <button
+              onClick={download}
+              className="w-full rounded-full border border-gold/40 bg-card py-3 text-sm font-semibold text-foreground flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            >
+              <Download className="w-4 h-4 text-gold" /> تحميل الصورة المضغوطة
+            </button>
+          </>
         )}
 
         {original && !loading && (
@@ -173,7 +202,7 @@ const DataSaver = () => {
             onClick={() => fileRef.current?.click()}
             className="w-full rounded-full border border-border py-3 text-sm font-semibold text-foreground flex items-center justify-center gap-2"
           >
-            <FileDown className="w-4 h-4" /> Pick another image
+            <FileDown className="w-4 h-4" /> صورة جديدة
           </button>
         )}
 

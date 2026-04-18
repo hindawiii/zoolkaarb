@@ -1,4 +1,4 @@
-import { Home, MessageCircle, ImagePlus, Settings, Mic } from "lucide-react";
+import { Home, MessageCircle, ImagePlus, Settings, NotebookPen } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useUser } from "@/store/userStore";
@@ -29,18 +29,15 @@ const BottomNav = () => {
     } catch { /* noop */ }
   }, []);
 
-  const sideTabs = [
-    { id: "/", label: t("nav.home", language), icon: Home },
-    { id: "/chat", label: t("nav.chat", language), icon: MessageCircle },
-    { id: "/studio", label: t("nav.studio", language), icon: ImagePlus },
-    { id: "/settings", label: t("nav.settings", language), icon: Settings },
-  ];
+  const home = { id: "/", label: t("nav.home", language), icon: Home };
+  const chat = { id: "/chat", label: t("nav.chat", language), icon: MessageCircle };
+  const studio = { id: "/studio", label: t("nav.studio", language), icon: ImagePlus };
+  const settings = { id: "/settings", label: t("nav.settings", language), icon: Settings };
 
-  // RTL order requested: Settings → Studio → [Voice] → Al-Khal → Home
-  // With dir="rtl" the visual right-to-left order matches array order, so:
-  // Right-most first in RTL = Home. Array order: Home, Chat, [Voice], Studio, Settings.
-  const left = isAr ? [sideTabs[0], sideTabs[1]] : [sideTabs[0], sideTabs[1]]; // Home, Chat
-  const right = isAr ? [sideTabs[2], sideTabs[3]] : [sideTabs[2], sideTabs[3]]; // Studio, Settings
+  // RTL visual order (right→left): Home, Chat, [Mufakkira], Studio, Settings
+  // With dir="rtl", DOM order left→right renders as right→left visually.
+  const right = [home, chat]; // appears on the right in RTL
+  const left = [studio, settings]; // appears on the left in RTL
 
   const handleVoiceClick = () => {
     setPopping(true);
@@ -57,12 +54,12 @@ const BottomNav = () => {
         key={tab.id}
         onClick={() => navigate(tab.id)}
         className={cn(
-          "flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all flex-1",
+          "flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 rounded-xl transition-all w-full h-full",
           isActive ? "text-primary scale-105" : "text-muted-foreground",
         )}
       >
         <tab.icon className={cn("w-5 h-5", isActive && "stroke-[2.5]")} />
-        <span className="text-[10px] font-medium font-cairo">{tab.label}</span>
+        <span className="text-[10px] font-medium font-cairo leading-none">{tab.label}</span>
         {isActive && <div className="w-1 h-1 rounded-full bg-primary mt-0.5" />}
       </button>
     );
@@ -73,25 +70,27 @@ const BottomNav = () => {
       className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border px-2 pb-safe z-20"
       dir={isAr ? "rtl" : "ltr"}
     >
-      <div className="relative flex items-end justify-around h-16 max-w-md mx-auto">
-        {left.map(renderTab)}
+      <div className="relative grid grid-cols-5 items-end h-16 max-w-md mx-auto">
+        {/* RTL DOM order maps to visual right→left: Home, Chat, [Mufakkira], Studio, Settings */}
+        <div className="flex items-end justify-center h-full">{renderTab(right[0])}</div>
+        <div className="flex items-end justify-center h-full">{renderTab(right[1])}</div>
 
-        {/* Center raised Voice button */}
-        <div className="relative flex-1 flex justify-center">
-          <div className="absolute -top-7 flex flex-col items-center">
+        {/* Center raised Mufakkira button */}
+        <div className="relative flex justify-center h-full">
+          <div className="absolute -top-7 flex flex-col items-center left-1/2 -translate-x-1/2">
             <button
               onClick={handleVoiceClick}
-              aria-label={isAr ? "مفكرة الخال الصوتية" : "Voice Notes"}
+              aria-label={isAr ? "مفكرة الخال" : "Mufakkira"}
               className={cn(
-                "w-14 h-14 rounded-full gradient-gold text-primary-foreground",
+                "w-16 h-16 rounded-full gradient-gold text-primary-foreground",
                 "flex items-center justify-center shadow-[0_8px_24px_-6px_hsl(45_90%_55%/0.55)]",
                 "ring-4 ring-background transition-transform active:scale-90",
                 popping ? "animate-scale-in" : "hover:scale-105",
               )}
             >
-              <Mic className="w-6 h-6" strokeWidth={2.5} />
+              <NotebookPen className="w-7 h-7" strokeWidth={2.3} />
             </button>
-            <span className="mt-1 text-[10px] font-bold font-cairo text-foreground">
+            <span className="mt-1 text-[10px] font-medium font-cairo text-foreground leading-none">
               {isAr ? "المفكرة" : "Notes"}
             </span>
 
@@ -109,7 +108,8 @@ const BottomNav = () => {
           </div>
         </div>
 
-        {right.map(renderTab)}
+        <div className="flex items-end justify-center h-full">{renderTab(left[0])}</div>
+        <div className="flex items-end justify-center h-full">{renderTab(left[1])}</div>
       </div>
     </nav>
   );

@@ -1,4 +1,4 @@
-import { ImagePlus, Heart, Mic2, Share2 } from "lucide-react";
+import { ImagePlus, Heart, Wand2, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useUser } from "@/store/userStore";
@@ -26,11 +26,11 @@ const ServiceGrid = () => {
       route: "/al-wajib",
     },
     {
-      titleAr: "المسجل الذكي",
-      desc: t("svc.recorder.desc", language),
-      icon: Mic2,
+      titleAr: "غيّر صوتك",
+      desc: language === "ar" ? "مقلب الصوت بشخصيات سودانية" : "Voice changer with Sudanese characters",
+      icon: Wand2,
       iconBg: "bg-earth/20",
-      route: null,
+      route: "/voice-changer",
     },
     {
       titleAr: "زول شير",

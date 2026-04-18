@@ -275,8 +275,8 @@ const VoiceChanger = () => {
     const file = new File([previewBlob], `zoolkaarb-${selected ?? "voice"}.wav`, { type: "audio/wav" });
     const text = "مقلب من زول كـــــارب 🎤";
     try {
-      // @ts-expect-error canShare files
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      const nav = navigator as Navigator & { canShare?: (d: { files: File[] }) => boolean };
+      if (nav.canShare && nav.canShare({ files: [file] })) {
         await navigator.share({ files: [file], text, title: "ZoolKaarb" });
         return;
       }

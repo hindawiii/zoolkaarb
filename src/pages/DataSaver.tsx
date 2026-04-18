@@ -107,7 +107,8 @@ const DataSaver = () => {
 
       await ff.exec(args);
       const data = await ff.readFile(outputName);
-      const blob = new Blob([data as Uint8Array], { type: "video/mp4" });
+      const bytes = new Uint8Array(data as Uint8Array);
+      const blob = new Blob([bytes.buffer], { type: "video/mp4" });
       const file = new File([blob], `compressed-${original.name.replace(/\.[^.]+$/, "")}.mp4`, { type: "video/mp4" });
       setCompressed(file);
       setCompressedUrl(URL.createObjectURL(file));
@@ -136,7 +137,8 @@ const DataSaver = () => {
       await ff.writeFile(inputName, await fetchFile(original));
       await ff.exec(["-i", inputName, "-vn", "-c:a", "libmp3lame", "-b:a", "128k", outputName]);
       const data = await ff.readFile(outputName);
-      const blob = new Blob([data as Uint8Array], { type: "audio/mpeg" });
+      const bytes = new Uint8Array(data as Uint8Array);
+      const blob = new Blob([bytes.buffer], { type: "audio/mpeg" });
       const file = new File([blob], `compressed-${original.name.replace(/\.[^.]+$/, "")}.mp3`, { type: "audio/mpeg" });
       setCompressed(file);
       setCompressedUrl(URL.createObjectURL(file));

@@ -87,6 +87,13 @@ const VoiceNotesFAB = () => {
 
   useEffect(() => setNotes(loadNotes()), [open]);
 
+  // Allow other components (e.g. BottomNav center button) to open the sheet
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("zoolkaarb:open-voice-notes", handler);
+    return () => window.removeEventListener("zoolkaarb:open-voice-notes", handler);
+  }, []);
+
   useEffect(() => {
     return () => {
       if (tickRef.current) window.clearInterval(tickRef.current);
@@ -282,27 +289,12 @@ const VoiceNotesFAB = () => {
     if (!s.moved) setOpen(true);
   };
 
+  // Suppress unused-warning for legacy drag handlers (kept for future re-enable)
+  void onPointerDown; void onPointerMove; void onPointerUp; void pos;
+
   return (
     <>
-      {/* Floating Action Button */}
-      <button
-        aria-label={isAr ? "مفكرة الخال الصوتية" : "Voice Notes"}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        style={{
-          position: "fixed",
-          bottom: pos.y,
-          insetInlineEnd: pos.x,
-          touchAction: "none",
-        }}
-        className={cn(
-          "z-40 w-14 h-14 rounded-full gradient-gold text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform",
-          "animate-pulse-glow",
-        )}
-      >
-        <Mic className="w-6 h-6" />
-      </button>
+      {/* Floating mic FAB removed — primary entry is now the BottomNav center button */}
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent

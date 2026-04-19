@@ -136,6 +136,36 @@
     line-height: 1.8;
   }
 
+  /* Creative Arabic font library (loaded via Google Fonts in index.html) */
+  .font-reem-kufi { font-family: 'Reem Kufi', 'Tajawal', sans-serif; }
+  .font-amiri { font-family: 'Amiri', 'Tajawal', serif; }
+  .font-changa { font-family: 'Changa', 'Tajawal', sans-serif; }
+  .font-aref-ruqaa { font-family: 'Aref Ruqaa', 'Tajawal', serif; }
+  .font-lemonada { font-family: 'Lemonada', 'Tajawal', sans-serif; }
+
+  /* Sudanese Gold palette gradients for premium text */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #FFD86B 0%, #C4944A 50%, #8B5E1A 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  .text-gradient-bronze {
+    background: linear-gradient(135deg, #E6A472 0%, #B06A2E 55%, #5C3210 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  .text-gradient-silver {
+    background: linear-gradient(135deg, #F4F4F4 0%, #BFBFBF 50%, #6E6E6E 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
   .glow-gold {
     box-shadow: 0 0 20px hsl(var(--gold-glow) / 0.4), 0 0 60px hsl(var(--gold-glow) / 0.15);
   }

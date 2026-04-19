@@ -181,8 +181,8 @@ const StudioToolPage = () => {
     try {
       const blob = await (await fetch(output)).blob();
       const file = new File([blob], "zool-studio.png", { type: "image/png" });
-      // @ts-expect-error canShare not in lib
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      const nav = navigator as Navigator & { canShare?: (d: { files: File[] }) => boolean };
+      if (nav.canShare && nav.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: "Zool Karb Studio" });
       } else {
         const a = document.createElement("a");

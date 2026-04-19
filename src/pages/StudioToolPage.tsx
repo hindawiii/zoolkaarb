@@ -61,7 +61,7 @@ const StudioToolPage = () => {
 
   const requiredCount = tool.mode === "single-edit" || tool.mode === "living-image" ? 1 : tool.mode === "multi-edit" ? 2 : 2;
   const maxImages = tool.mode === "multi-edit" ? 4 : tool.mode === "single-edit" || tool.mode === "living-image" ? 1 : 2;
-  const slotLabels = tool.mode === "face-swap" || tool.mode === "dual-edit"
+  const slotLabels = tool.mode === "dual-edit"
     ? isRtl ? ["1. صورة الجسم/الخلفية", "2. صورة الوجه"] : ["1. Body / scene", "2. Face source"]
     : tool.mode === "vs-arena"
       ? isRtl ? ["المتنافس 1", "المتنافس 2"] : ["Fighter 1", "Fighter 2"]

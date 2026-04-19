@@ -17,15 +17,36 @@ const PROMPTS: Record<string, string> = {
     "Apply a warm, golden-hour color filter to this photo. Boost warm tones (orange/gold), keep skin tones natural, slight film grain.",
   "filter-cool":
     "Apply a cool cinematic color grade to this photo. Cyan-blue shadows, gentle highlights, modern moody look. Keep faces natural.",
+
+  // AI Studio Suite
+  "anime-hero":
+    "Transform the person in this photo into a high-quality Japanese anime character. Vibrant colors, clean cel-shading, expressive eyes, dynamic hair. Keep recognizable facial features and pose.",
+  "clothes-formal":
+    "Replace the clothing of the person in this photo with elegant formal wear (sharp suit or evening dress). Match lighting, shadows, and skin tone perfectly. Keep face, hair, and pose identical.",
+  "clothes-traditional":
+    "Replace the clothing of the person in this photo with traditional Sudanese attire (jalabiya/thobe with imma turban for men, vibrant toub for women). Match lighting, shadows, and skin tone. Keep face and pose identical.",
+  "clothes-casual":
+    "Replace the clothing of the person in this photo with stylish modern casual streetwear. Match lighting, shadows, and skin tone. Keep face, hair, and pose identical.",
+  "face-swap":
+    "Take the face from the SECOND image and seamlessly blend it onto the person in the FIRST image. Match skin tone, lighting direction, shadows, and color grading perfectly. Preserve the body, pose, and background of the first image. Photorealistic result.",
+  "smart-blender":
+    "Merge the provided images into a single cohesive composition. Apply AI color harmonization to unify lighting, shadows, and color grading across all elements so they look like one natural photo.",
+  "challenge-arena":
+    "Create a side-by-side VS battle composition from the two provided images. Place them on left and right halves with a dramatic golden divider. Match lighting and add a cinematic dark vignette. Leave clear empty space in the center for a VS badge overlay.",
 };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { imageBase64, action } = await req.json();
-    if (!imageBase64 || typeof imageBase64 !== "string") {
-      return new Response(JSON.stringify({ error: "imageBase64 is required" }), {
+    const { imageBase64, images, action } = await req.json();
+    const imageList: string[] = Array.isArray(images) && images.length > 0
+      ? images
+      : imageBase64
+        ? [imageBase64]
+        : [];
+    if (imageList.length === 0) {
+      return new Response(JSON.stringify({ error: "imageBase64 or images is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -41,9 +62,12 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const dataUrl = imageBase64.startsWith("data:")
-      ? imageBase64
-      : `data:image/png;base64,${imageBase64}`;
+    const toDataUrl = (s: string) =>
+      s.startsWith("data:") ? s : `data:image/png;base64,${s}`;
+    const content: Array<Record<string, unknown>> = [{ type: "text", text: prompt }];
+    for (const img of imageList) {
+      content.push({ type: "image_url", image_url: { url: toDataUrl(img) } });
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -53,15 +77,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash-image",
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: dataUrl } },
-            ],
-          },
-        ],
+        messages: [{ role: "user", content }],
         modalities: ["image", "text"],
       }),
     });

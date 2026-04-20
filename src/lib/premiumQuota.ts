@@ -1,43 +1,19 @@
-// Lightweight quota tracker for premium font/effect usage in the
-// Text-on-Image / Status Maker editor. Independent of the Studio quota.
+// Back-compat shim. The real ledger lives in `zoolCredits.ts`.
+// Premium fonts/effects in TemplateEditor continue to work unchanged.
 
-const KEY = "zoolkaarb-premium-text-quota-v1";
-export const FREE_LIMIT = 3;
-export const AD_REWARD = 3;
+import {
+  FREE_TRIAL,
+  DEFAULT_REWARD,
+  getCredits,
+  consumeCredit,
+  grantReward,
+} from "./zoolCredits";
 
-const read = (): number => {
-  if (typeof window === "undefined") return FREE_LIMIT;
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw === null) {
-      localStorage.setItem(KEY, String(FREE_LIMIT));
-      return FREE_LIMIT;
-    }
-    const n = Number(raw);
-    return Number.isFinite(n) ? n : FREE_LIMIT;
-  } catch {
-    return FREE_LIMIT;
-  }
-};
+export const FREE_LIMIT = FREE_TRIAL;
+export const AD_REWARD = DEFAULT_REWARD;
 
-const write = (n: number) => {
-  try {
-    localStorage.setItem(KEY, String(Math.max(0, n)));
-  } catch {
-    /* ignore */
-  }
-};
+const TOOL = "premium-text";
 
-export const getPremiumRemaining = (): number => read();
-
-export const consumePremiumUse = (): number => {
-  const next = Math.max(0, read() - 1);
-  write(next);
-  return next;
-};
-
-export const grantPremiumReward = (): number => {
-  const next = read() + AD_REWARD;
-  write(next);
-  return next;
-};
+export const getPremiumRemaining = (): number => getCredits(TOOL);
+export const consumePremiumUse = (): number => consumeCredit(TOOL);
+export const grantPremiumReward = (): number => grantReward(TOOL);

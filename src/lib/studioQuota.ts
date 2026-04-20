@@ -1,9 +1,17 @@
-// Universal "3-Free" rewarded-ad quota system for AI Studio tools.
-// Persists per-tool counters in localStorage. After FREE_LIMIT uses,
-// the user must "watch a rewarded ad" (mock modal) to earn AD_REWARD more uses.
+// Back-compat shim. The real ledger lives in `zoolCredits.ts`.
+// All Studio tools continue to work unchanged through these re-exports.
 
-export const FREE_LIMIT = 3;
-export const AD_REWARD = 3;
+import {
+  FREE_TRIAL,
+  DEFAULT_REWARD,
+  getCredits,
+  consumeCredit,
+  grantReward,
+  resetCredits,
+} from "./zoolCredits";
+
+export const FREE_LIMIT = FREE_TRIAL;
+export const AD_REWARD = DEFAULT_REWARD;
 
 export type StudioToolId =
   | "living-image"
@@ -13,55 +21,7 @@ export type StudioToolId =
   | "smart-blender"
   | "challenge-arena";
 
-const KEY = "zoolkaarb-studio-quota-v1";
-
-type QuotaMap = Record<string, number>; // toolId -> remaining uses
-
-const read = (): QuotaMap => {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as QuotaMap) : {};
-  } catch {
-    return {};
-  }
-};
-
-const write = (m: QuotaMap) => {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(m));
-  } catch {
-    /* ignore */
-  }
-};
-
-export const getRemaining = (tool: StudioToolId): number => {
-  const m = read();
-  if (m[tool] === undefined) {
-    m[tool] = FREE_LIMIT;
-    write(m);
-  }
-  return m[tool];
-};
-
-export const consumeUse = (tool: StudioToolId): number => {
-  const m = read();
-  const current = m[tool] ?? FREE_LIMIT;
-  const next = Math.max(0, current - 1);
-  m[tool] = next;
-  write(m);
-  return next;
-};
-
-export const grantAdReward = (tool: StudioToolId): number => {
-  const m = read();
-  m[tool] = (m[tool] ?? 0) + AD_REWARD;
-  write(m);
-  return m[tool];
-};
-
-export const resetQuota = (tool: StudioToolId): void => {
-  const m = read();
-  m[tool] = FREE_LIMIT;
-  write(m);
-};
+export const getRemaining = (tool: StudioToolId): number => getCredits(tool);
+export const consumeUse = (tool: StudioToolId): number => consumeCredit(tool);
+export const grantAdReward = (tool: StudioToolId): number => grantReward(tool);
+export const resetQuota = (tool: StudioToolId): void => resetCredits(tool);

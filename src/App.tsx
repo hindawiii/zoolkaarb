@@ -16,6 +16,10 @@ import ZoolShare from "./pages/ZoolShare.tsx";
 import Scanner from "./pages/Scanner.tsx";
 import ZoolYafatish from "./pages/ZoolYafatish.tsx";
 import VoiceChanger from "./pages/VoiceChanger.tsx";
+import AudioStudio from "./pages/AudioStudio.tsx";
+import MediaFactory from "./pages/audio/MediaFactory.tsx";
+import VoiceOver from "./pages/audio/VoiceOver.tsx";
+import Remix from "./pages/audio/Remix.tsx";
 import FakeCall from "./pages/FakeCall.tsx";
 import FakeCallIncoming from "./pages/FakeCallIncoming.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -43,6 +47,10 @@ const App = () => (
           <Route path="/scanner" element={<Scanner />} />
           <Route path="/yafatish" element={<ZoolYafatish />} />
           <Route path="/voice-changer" element={<VoiceChanger />} />
+          <Route path="/audio-studio" element={<AudioStudio />} />
+          <Route path="/audio-studio/media-factory" element={<MediaFactory />} />
+          <Route path="/audio-studio/voice-over" element={<VoiceOver />} />
+          <Route path="/audio-studio/remix" element={<Remix />} />
           <Route path="/fake-call" element={<FakeCall />} />
           <Route path="/fake-call/incoming" element={<FakeCallIncoming />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

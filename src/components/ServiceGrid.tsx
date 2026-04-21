@@ -10,6 +10,9 @@ import {
   Sparkles,
   Database,
   ScanLine,
+  FileText,
+  FileType2,
+  Briefcase,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -140,13 +143,44 @@ const ServiceGrid = () => {
           iconBg: "bg-nile/20",
           route: "/data-saver",
         },
+      ],
+    },
+    {
+      titleAr: "المكتب الرقمي",
+      titleEn: "Digital Office",
+      accent: "bg-gradient-to-r from-gold to-gold-glow",
+      tiles: [
         {
-          titleAr: "السكنر",
-          titleEn: "Scanner",
-          desc: isRtl ? "مسح المستندات" : "Scan documents",
+          titleAr: "ماسح المستندات",
+          titleEn: "Doc Scanner",
+          desc: isRtl ? "صور المستند PDF" : "Capture as PDF",
           icon: ScanLine,
-          iconBg: "bg-earth/20",
+          iconBg: "bg-gold/20",
           route: "/scanner",
+        },
+        {
+          titleAr: "صور / نص → PDF",
+          titleEn: "Image / Text → PDF",
+          desc: isRtl ? "اجمع صور أو نص" : "Merge to PDF",
+          icon: FileText,
+          iconBg: "bg-nile/20",
+          route: "/office/to-pdf",
+        },
+        {
+          titleAr: "PDF ↔ Word",
+          titleEn: "PDF ↔ Word",
+          desc: isRtl ? "بدعم العربي" : "Arabic OCR",
+          icon: FileType2,
+          iconBg: "bg-earth/20",
+          route: "/office/converter",
+        },
+        {
+          titleAr: "كل المكتب",
+          titleEn: "All Office Tools",
+          desc: isRtl ? "ادخل المكتب" : "Open the office",
+          icon: Briefcase,
+          iconBg: "bg-gold/20",
+          route: "/office",
         },
       ],
     },

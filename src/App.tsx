@@ -22,8 +22,12 @@ import VoiceOver from "./pages/audio/VoiceOver.tsx";
 import Remix from "./pages/audio/Remix.tsx";
 import FakeCall from "./pages/FakeCall.tsx";
 import FakeCallIncoming from "./pages/FakeCallIncoming.tsx";
+import Office from "./pages/office/Office.tsx";
+import ToPdf from "./pages/office/ToPdf.tsx";
+import Converter from "./pages/office/Converter.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import VoiceNotesFAB from "./components/VoiceNotesFAB.tsx";
+import DailyChestModal from "./components/DailyChestModal.tsx";
 
 const queryClient = new QueryClient();
 
@@ -53,10 +57,14 @@ const App = () => (
           <Route path="/audio-studio/remix" element={<Remix />} />
           <Route path="/fake-call" element={<FakeCall />} />
           <Route path="/fake-call/incoming" element={<FakeCallIncoming />} />
+          <Route path="/office" element={<Office />} />
+          <Route path="/office/to-pdf" element={<ToPdf />} />
+          <Route path="/office/converter" element={<Converter />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <VoiceNotesFAB />
+        <DailyChestModal />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

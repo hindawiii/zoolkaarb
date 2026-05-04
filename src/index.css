@@ -142,6 +142,26 @@
   .font-changa { font-family: 'Changa', 'Tajawal', sans-serif; }
   .font-aref-ruqaa { font-family: 'Aref Ruqaa', 'Tajawal', serif; }
   .font-lemonada { font-family: 'Lemonada', 'Tajawal', sans-serif; }
+  .font-cairo-display { font-family: 'Cairo', 'Tajawal', sans-serif; }
+  .font-mohanad { font-family: 'El Messiri', 'Markazi Text', 'Tajawal', serif; }
+
+  .text-emerald-rich {
+    color: #047857;
+  }
+  .text-royal-gold {
+    background: linear-gradient(135deg, #FFE066 0%, #D4AF37 50%, #8B6914 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  .text-neon-gradient {
+    background: linear-gradient(135deg, #FF00C8 0%, #00F0FF 50%, #B400FF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
 
   /* Sudanese Gold palette gradients for premium text */
   .text-gradient-gold {

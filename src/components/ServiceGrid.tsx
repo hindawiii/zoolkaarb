@@ -3,7 +3,7 @@ import {
   Heart,
   Wand2,
   Share2,
-  Mic,
+  
   PhoneCall,
   PhoneIncoming,
   Music2,

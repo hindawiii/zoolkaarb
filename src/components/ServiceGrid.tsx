@@ -3,16 +3,8 @@ import {
   Heart,
   Wand2,
   Share2,
-  
   PhoneCall,
-  PhoneIncoming,
   Music2,
-  Sparkles,
-  Database,
-  ScanLine,
-  FileText,
-  FileType2,
-  Briefcase,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";

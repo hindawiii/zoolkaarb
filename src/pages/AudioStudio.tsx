@@ -36,16 +36,6 @@ const TOOLS: Tool[] = [
     icon: Mic2,
     accent: "nile",
   },
-  {
-    id: "remix",
-    slug: "remix",
-    labelAr: "ريمكس الخال",
-    labelEn: "Al-Khal Remix",
-    taglineAr: "مكتبة مقدمات وخواتم سودانية حصرية",
-    taglineEn: "Sudanese intros & outros library",
-    icon: Music4,
-    accent: "earth",
-  },
 ];
 
 const accentClasses: Record<Tool["accent"], string> = {

@@ -10,6 +10,7 @@ export const DEFAULT_REWARD = 3;
 // Tool-specific ad reward overrides. Default is 3.
 const REWARD_BY_TOOL: Record<string, number> = {
   "fake-call": 2,
+  "voice-changer": 5,
 };
 
 const KEY = "zoolkaarb-credits-v1";

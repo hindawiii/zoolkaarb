@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronLeft, ChevronRight, Film, Mic2, Music4 } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Film, Mic2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useUser } from "@/store/userStore";

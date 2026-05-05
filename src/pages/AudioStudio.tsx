@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronLeft, ChevronRight, Film, Mic2, Music4 } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Film, Mic2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useUser } from "@/store/userStore";
@@ -35,16 +35,6 @@ const TOOLS: Tool[] = [
     taglineEn: "Drop voice at start / middle / end",
     icon: Mic2,
     accent: "nile",
-  },
-  {
-    id: "remix",
-    slug: "remix",
-    labelAr: "ريمكس الخال",
-    labelEn: "Al-Khal Remix",
-    taglineAr: "مكتبة مقدمات وخواتم سودانية حصرية",
-    taglineEn: "Sudanese intros & outros library",
-    icon: Music4,
-    accent: "earth",
   },
 ];
 

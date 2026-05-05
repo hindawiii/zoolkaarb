@@ -5,9 +5,8 @@ import { useUser } from "@/store/userStore";
 import { useZoolCredits } from "@/lib/zoolCredits";
 import ZoolAdModal from "@/components/ZoolAdModal";
 import StudioProgress from "@/components/audio/StudioProgress";
-import { isVideoFile, loadAudioBuffer, renderMixWithDucking, downloadBlob } from "@/lib/audioMixer";
-import { synthesizeArabicToBuffer } from "@/lib/audioMixer";
-import { pickRandomSignature } from "@/lib/alKhalSignature";
+import { isVideoFile, downloadBlob } from "@/lib/audioMixer";
+import { extractAudioFile, renderImageWithAudio } from "@/lib/mediaPipeline";
 import { toast } from "sonner";
 
 const TOOL_ID = "media-factory";
@@ -19,13 +18,14 @@ const MediaFactory = () => {
   const { credits, consume } = useZoolCredits(TOOL_ID);
 
   const [mode, setMode] = useState<"video2audio" | "photo+audio">("video2audio");
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [signature, setSignature] = useState(true);
   const [progress, setProgress] = useState(0);
   const [busy, setBusy] = useState(false);
   const [adOpen, setAdOpen] = useState(false);
-  const mediaRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLInputElement>(null);
 
   const startExport = async () => {
@@ -33,39 +33,36 @@ const MediaFactory = () => {
       setAdOpen(true);
       return;
     }
-    if (mode === "video2audio" && !mediaFile) {
+    if (mode === "video2audio" && !videoFile) {
       toast.error(isRtl ? "اختار فيديو الأول يا هندسة" : "Pick a video first");
       return;
     }
-    if (mode === "photo+audio" && !audioFile) {
-      toast.error(isRtl ? "اختار ملف صوتي" : "Pick an audio file");
+    if (mode === "photo+audio" && (!imageFile || !audioFile)) {
+      toast.error(isRtl ? "محتاج صورة وملف صوتي" : "Need both image and audio");
       return;
     }
 
     setBusy(true);
     setProgress(0.05);
     try {
-      let musicBuf;
       if (mode === "video2audio") {
-        musicBuf = await loadAudioBuffer(mediaFile!, (r) => setProgress(0.1 + r * 0.4));
+        if (!isVideoFile(videoFile!)) {
+          toast.error(isRtl ? "الملف لازم يكون فيديو" : "Must be a video file");
+          setBusy(false);
+          return;
+        }
+        const { blob, ext } = await extractAudioFile(videoFile!, (r) =>
+          setProgress(0.1 + r * 0.85),
+        );
+        consume();
+        downloadBlob(blob, `zool-karb-audio-${Date.now()}.${ext}`);
       } else {
-        musicBuf = await loadAudioBuffer(audioFile!, (r) => setProgress(0.1 + r * 0.4));
+        const blob = await renderImageWithAudio(imageFile!, audioFile!, (r) =>
+          setProgress(0.1 + r * 0.85),
+        );
+        consume();
+        downloadBlob(blob, `zool-karb-video-${Date.now()}.mp4`);
       }
-      setProgress(0.55);
-
-      const voices = [];
-      if (signature) {
-        const sig = pickRandomSignature();
-        const sigBuf = await synthesizeArabicToBuffer(sig, 2.5);
-        voices.push({ buffer: sigBuf, startSec: Math.max(0, musicBuf.duration - 2.5) });
-      }
-
-      const blob = await renderMixWithDucking(
-        { music: musicBuf, voices, duckLevel: 0.3 },
-        (r) => setProgress(0.6 + r * 0.4),
-      );
-      consume();
-      downloadBlob(blob, `zool-karb-${Date.now()}.webm`);
       toast.success(isRtl ? "تم الكرب! ✓" : "Exported!");
     } catch (e) {
       console.error(e);
@@ -107,7 +104,7 @@ const MediaFactory = () => {
             >
               {m === "video2audio"
                 ? isRtl ? "فيديو ← صوت" : "Video → Audio"
-                : isRtl ? "صورة + صوت" : "Photo + Audio"}
+                : isRtl ? "صورة + صوت ← فيديو" : "Photo + Audio → Video"}
             </button>
           ))}
         </div>
@@ -119,16 +116,16 @@ const MediaFactory = () => {
           <UploadCard
             icon={Film}
             label={isRtl ? "اختار فيديو" : "Pick a video"}
-            sub={mediaFile?.name}
-            onClick={() => mediaRef.current?.click()}
+            sub={videoFile?.name}
+            onClick={() => videoRef.current?.click()}
           />
         ) : (
           <>
             <UploadCard
               icon={ImageIcon}
-              label={isRtl ? "اختار صورة (اختياري)" : "Pick a photo (optional)"}
-              sub={mediaFile && !isVideoFile(mediaFile) ? mediaFile.name : undefined}
-              onClick={() => mediaRef.current?.click()}
+              label={isRtl ? "اختار صورة" : "Pick a photo"}
+              sub={imageFile?.name}
+              onClick={() => imageRef.current?.click()}
             />
             <UploadCard
               icon={Music2}
@@ -138,14 +135,13 @@ const MediaFactory = () => {
             />
           </>
         )}
-        <input ref={mediaRef} type="file" accept={mode === "video2audio" ? "video/*" : "image/*,audio/*"} className="hidden"
-          onChange={(e) => setMediaFile(e.target.files?.[0] ?? null)} />
+        <input ref={videoRef} type="file" accept="video/*" className="hidden"
+          onChange={(e) => setVideoFile(e.target.files?.[0] ?? null)} />
+        <input ref={imageRef} type="file" accept="image/*" className="hidden"
+          onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
         <input ref={audioRef} type="file" accept="audio/*" className="hidden"
           onChange={(e) => setAudioFile(e.target.files?.[0] ?? null)} />
       </div>
-
-      {/* Signature toggle */}
-      <SignatureToggle value={signature} onChange={setSignature} isRtl={isRtl} />
 
       {/* Export */}
       <div className="px-4 mt-5">
@@ -161,7 +157,12 @@ const MediaFactory = () => {
         </button>
       </div>
 
-      <StudioProgress open={busy} progress={progress} isRtl={isRtl} />
+      <StudioProgress
+        open={busy}
+        progress={progress}
+        isRtl={isRtl}
+        message={isRtl ? "الخال شغال.. بجهز ليك الفزعة" : "Processing your media..."}
+      />
       <ZoolAdModal open={adOpen} toolId={TOOL_ID} isRtl={isRtl} onClose={() => setAdOpen(false)} />
     </div>
   );

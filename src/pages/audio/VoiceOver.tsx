@@ -36,6 +36,13 @@ const VoiceOver = () => {
   const [progress, setProgress] = useState(0);
   const [adOpen, setAdOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const voiceFileRef = useRef<HTMLInputElement>(null);
+  const [voiceSlot, setVoiceSlot] = useState<Slot>("middle");
+
+  const handleVoiceUpload = (file: File) => {
+    setVoiceBlobs((p) => ({ ...p, [voiceSlot]: file }));
+    toast.success(isRtl ? "تم رفع البصمة" : "Voice clip added");
+  };
 
   const beginRecord = async (slot: Slot) => {
     try {
@@ -119,6 +126,41 @@ const VoiceOver = () => {
         </button>
         <input ref={fileRef} type="file" accept="audio/*" className="hidden"
           onChange={(e) => setMusicFile(e.target.files?.[0] ?? null)} />
+
+        {/* Direct voice file upload */}
+        <div className="mt-3 rounded-2xl border border-gold/30 bg-card/50 backdrop-blur p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Mic className="w-4 h-4 text-gold" />
+            <p className="text-xs font-bold font-cairo text-foreground">
+              {isRtl ? "أو ارفع بصمة صوتية جاهزة" : "Or upload a ready voice clip"}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <select
+              value={voiceSlot}
+              onChange={(e) => setVoiceSlot(e.target.value as Slot)}
+              className="flex-1 rounded-xl bg-background border border-border px-3 py-2 text-xs font-cairo text-foreground"
+            >
+              <option value="start">{isRtl ? "البداية" : "Start"}</option>
+              <option value="middle">{isRtl ? "الوسط" : "Middle"}</option>
+              <option value="end">{isRtl ? "النهاية" : "End"}</option>
+            </select>
+            <button
+              onClick={() => voiceFileRef.current?.click()}
+              className="px-4 py-2 rounded-xl bg-gold/20 border border-gold/40 text-gold text-xs font-bold font-cairo flex items-center gap-1.5"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              {isRtl ? "ارفع" : "Upload"}
+            </button>
+          </div>
+          {voiceBlobs[voiceSlot] && (
+            <p className="text-[10.5px] text-muted-foreground font-cairo mt-2 truncate">
+              ✓ {(voiceBlobs[voiceSlot] as File).name ?? (isRtl ? "تم الرفع" : "Uploaded")}
+            </p>
+          )}
+          <input ref={voiceFileRef} type="file" accept="audio/*" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleVoiceUpload(f); }} />
+        </div>
       </div>
 
       {/* Timeline */}

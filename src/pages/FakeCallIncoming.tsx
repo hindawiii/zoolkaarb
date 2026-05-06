@@ -265,11 +265,19 @@ const FakeCallIncoming = () => {
         <p className="text-sm text-white/60 font-cairo mb-2">
           {isIos ? "مكالمة واردة..." : "مكالمة جوال"}
         </p>
-        <div
-          className={`w-36 h-36 rounded-full ${AVATAR_GRADIENT[cfg.avatar]} flex items-center justify-center text-6xl font-bold shadow-2xl animate-pulse-glow mb-6`}
-        >
-          {initial}
-        </div>
+        {cfg.photoDataUrl ? (
+          <img
+            src={cfg.photoDataUrl}
+            alt=""
+            className="w-36 h-36 rounded-full object-cover ring-2 ring-white/30 shadow-2xl animate-pulse-glow mb-6"
+          />
+        ) : (
+          <div
+            className={`w-36 h-36 rounded-full ${AVATAR_GRADIENT[cfg.avatar]} flex items-center justify-center text-6xl font-bold shadow-2xl animate-pulse-glow mb-6`}
+          >
+            {initial}
+          </div>
+        )}
         <p className="text-3xl font-bold font-cairo">{cfg.callerName}</p>
         <p className="text-sm text-white/60 font-cairo mt-1">{cfg.callerLabel}</p>
       </div>

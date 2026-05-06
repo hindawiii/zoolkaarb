@@ -55,7 +55,15 @@ const FakeCallIncoming = () => {
   // Start ringing when ringing phase begins
   useEffect(() => {
     if (phase !== "ringing" || !cfg) return;
-    startRingtone();
+    startRingtone(cfg.ringtoneDataUrl ?? null);
+    // Try to enter fullscreen for max realism
+    try {
+      const el = document.documentElement as any;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) req.call(el).catch(() => {});
+    } catch {
+      /* ignore */
+    }
     return () => stopRingtone();
   }, [phase, cfg]);
 

@@ -123,7 +123,7 @@ const FakeCallIncoming = () => {
       if (next) {
         stopSpeaking();
       } else {
-        speakArabic(cfg.voiceLine);
+        speakArabic(cfg.voiceLine, { female: cfg.voice === "khala" });
       }
       return next;
     });

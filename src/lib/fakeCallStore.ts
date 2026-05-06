@@ -5,11 +5,15 @@
 
 export type FakeCallStyle = "ios" | "android";
 export type FakeCallAvatar = "gold" | "nile" | "earth" | "sand";
+export type FakeCallVoice = "khal" | "khala";
 
 export interface FakeCallConfig {
   callerName: string;
   callerLabel: string; // e.g. "جوال" / "Mobile"
   avatar: FakeCallAvatar;
+  photoDataUrl?: string | null; // optional custom caller photo
+  ringtoneDataUrl?: string | null; // optional custom ringtone (data URL)
+  voice: FakeCallVoice;
   style: FakeCallStyle;
   voiceLine: string;
   autoRedial: boolean;
@@ -51,11 +55,19 @@ export const AVATAR_GRADIENT: Record<FakeCallAvatar, string> = {
   sand: "bg-gradient-to-br from-[hsl(38_55%_75%)] to-[hsl(35_40%_50%)]",
 };
 
-// 5 preset Sudanese phrases the user can pick from. Played via Web Speech API.
+// Fallback preset Sudanese phrases (used if AI script generation fails).
 export const VOICE_LINES_AR = [
   "ألو يا هندسة، وينك يا زول؟ كنت محتاجك ضروري والله!",
   "السلام عليكم.. الخال معاك، عندي ليك خبر بسيط لو ما مشغول.",
   "يا زول طوالي تعال البيت، الناس مستنياك.",
   "أخوك، الله يعافيك تعال للقهوة دي ضروري.",
   "يا حبيب الخال، الفزعة محتاجاك دلوقتي!",
+];
+
+export const VOICE_LINES_AR_FEMALE = [
+  "ألو، معاك الخالة. عايزاك في موضوع مهم، رد علي لما تقدر.",
+  "السلام عليكم.. أنا الخالة، محتاجة كلمة معاك دقيقة.",
+  "يا ولدي، تعال البيت ضروري الناس مستنياك.",
+  "ابني، الخالة بتسأل عليك، ما تنسى المعاد.",
+  "يا حبيبي، جاوبني سريع.. عندي ليك خبر مهم.",
 ];

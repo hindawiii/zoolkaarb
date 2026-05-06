@@ -35,19 +35,28 @@ const playTwoToneBurst = () => {
   burst(480, 0.5, 0.4);
 };
 
-export const startRingtone = () => {
-  ensureCtx();
+export const startRingtone = (customDataUrl?: string | null) => {
   stopRingtone();
-  playTwoToneBurst();
-  // Loop every 2 seconds (1s ring + 1s silence pattern)
-  timerId = window.setInterval(playTwoToneBurst, 2000);
+  if (customDataUrl) {
+    try {
+      customAudio = new Audio(customDataUrl);
+      customAudio.loop = true;
+      customAudio.volume = 0.9;
+      customAudio.play().catch(() => {});
+    } catch {
+      /* fall back below */
+      customAudio = null;
+    }
+  }
+  if (!customAudio) {
+    ensureCtx();
+    playTwoToneBurst();
+    timerId = window.setInterval(playTwoToneBurst, 2000);
+  }
 
-  // Vibration pattern: ring-pause-ring
   if ("vibrate" in navigator) {
     try {
-      const pattern = [400, 200, 400, 1000];
-      navigator.vibrate(pattern);
-      // Re-trigger on each interval too
+      navigator.vibrate([400, 200, 400, 1000]);
     } catch {
       /* ignore */
     }
@@ -58,6 +67,15 @@ export const stopRingtone = () => {
   if (timerId !== null) {
     window.clearInterval(timerId);
     timerId = null;
+  }
+  if (customAudio) {
+    try {
+      customAudio.pause();
+      customAudio.src = "";
+    } catch {
+      /* ignore */
+    }
+    customAudio = null;
   }
   activeNodes = [];
   if ("vibrate" in navigator) {

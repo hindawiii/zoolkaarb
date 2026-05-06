@@ -93,7 +93,7 @@ const FakeCallIncoming = () => {
     setPhase("in-call");
     setTimer(0);
     // Speak the voice line (muted respects the mute toggle initially false)
-    speakArabic(cfg.voiceLine);
+    speakArabic(cfg.voiceLine, { female: cfg.voice === "khala" });
   };
 
   const decline = () => {

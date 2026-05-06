@@ -55,7 +55,15 @@ const FakeCallIncoming = () => {
   // Start ringing when ringing phase begins
   useEffect(() => {
     if (phase !== "ringing" || !cfg) return;
-    startRingtone();
+    startRingtone(cfg.ringtoneDataUrl ?? null);
+    // Try to enter fullscreen for max realism
+    try {
+      const el = document.documentElement as any;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) req.call(el).catch(() => {});
+    } catch {
+      /* ignore */
+    }
     return () => stopRingtone();
   }, [phase, cfg]);
 
@@ -85,7 +93,7 @@ const FakeCallIncoming = () => {
     setPhase("in-call");
     setTimer(0);
     // Speak the voice line (muted respects the mute toggle initially false)
-    speakArabic(cfg.voiceLine);
+    speakArabic(cfg.voiceLine, { female: cfg.voice === "khala" });
   };
 
   const decline = () => {
@@ -115,7 +123,7 @@ const FakeCallIncoming = () => {
       if (next) {
         stopSpeaking();
       } else {
-        speakArabic(cfg.voiceLine);
+        speakArabic(cfg.voiceLine, { female: cfg.voice === "khala" });
       }
       return next;
     });
@@ -182,11 +190,19 @@ const FakeCallIncoming = () => {
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center px-6">
-          <div
-            className={`w-32 h-32 rounded-full ${AVATAR_GRADIENT[cfg.avatar]} flex items-center justify-center text-5xl font-bold shadow-2xl mb-6`}
-          >
-            {initial}
-          </div>
+          {cfg.photoDataUrl ? (
+            <img
+              src={cfg.photoDataUrl}
+              alt=""
+              className="w-32 h-32 rounded-full object-cover ring-2 ring-white/30 shadow-2xl mb-6"
+            />
+          ) : (
+            <div
+              className={`w-32 h-32 rounded-full ${AVATAR_GRADIENT[cfg.avatar]} flex items-center justify-center text-5xl font-bold shadow-2xl mb-6`}
+            >
+              {initial}
+            </div>
+          )}
           <p className="text-2xl font-bold font-cairo">{cfg.callerName}</p>
           <p className="text-sm text-white/60 font-cairo mt-1">{cfg.callerLabel}</p>
           <p className="mt-4 text-base font-mono text-white/80">{formatTimer(timer)}</p>
@@ -249,11 +265,19 @@ const FakeCallIncoming = () => {
         <p className="text-sm text-white/60 font-cairo mb-2">
           {isIos ? "مكالمة واردة..." : "مكالمة جوال"}
         </p>
-        <div
-          className={`w-36 h-36 rounded-full ${AVATAR_GRADIENT[cfg.avatar]} flex items-center justify-center text-6xl font-bold shadow-2xl animate-pulse-glow mb-6`}
-        >
-          {initial}
-        </div>
+        {cfg.photoDataUrl ? (
+          <img
+            src={cfg.photoDataUrl}
+            alt=""
+            className="w-36 h-36 rounded-full object-cover ring-2 ring-white/30 shadow-2xl animate-pulse-glow mb-6"
+          />
+        ) : (
+          <div
+            className={`w-36 h-36 rounded-full ${AVATAR_GRADIENT[cfg.avatar]} flex items-center justify-center text-6xl font-bold shadow-2xl animate-pulse-glow mb-6`}
+          >
+            {initial}
+          </div>
+        )}
         <p className="text-3xl font-bold font-cairo">{cfg.callerName}</p>
         <p className="text-sm text-white/60 font-cairo mt-1">{cfg.callerLabel}</p>
       </div>

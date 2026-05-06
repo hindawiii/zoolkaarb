@@ -4,6 +4,7 @@
 let ctx: AudioContext | null = null;
 let timerId: number | null = null;
 let activeNodes: AudioNode[] = [];
+let customAudio: HTMLAudioElement | null = null;
 
 const ensureCtx = () => {
   if (!ctx) ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -34,19 +35,28 @@ const playTwoToneBurst = () => {
   burst(480, 0.5, 0.4);
 };
 
-export const startRingtone = () => {
-  ensureCtx();
+export const startRingtone = (customDataUrl?: string | null) => {
   stopRingtone();
-  playTwoToneBurst();
-  // Loop every 2 seconds (1s ring + 1s silence pattern)
-  timerId = window.setInterval(playTwoToneBurst, 2000);
+  if (customDataUrl) {
+    try {
+      customAudio = new Audio(customDataUrl);
+      customAudio.loop = true;
+      customAudio.volume = 0.9;
+      customAudio.play().catch(() => {});
+    } catch {
+      /* fall back below */
+      customAudio = null;
+    }
+  }
+  if (!customAudio) {
+    ensureCtx();
+    playTwoToneBurst();
+    timerId = window.setInterval(playTwoToneBurst, 2000);
+  }
 
-  // Vibration pattern: ring-pause-ring
   if ("vibrate" in navigator) {
     try {
-      const pattern = [400, 200, 400, 1000];
-      navigator.vibrate(pattern);
-      // Re-trigger on each interval too
+      navigator.vibrate([400, 200, 400, 1000]);
     } catch {
       /* ignore */
     }
@@ -57,6 +67,15 @@ export const stopRingtone = () => {
   if (timerId !== null) {
     window.clearInterval(timerId);
     timerId = null;
+  }
+  if (customAudio) {
+    try {
+      customAudio.pause();
+      customAudio.src = "";
+    } catch {
+      /* ignore */
+    }
+    customAudio = null;
   }
   activeNodes = [];
   if ("vibrate" in navigator) {
@@ -72,28 +91,38 @@ export const stopRingtone = () => {
  * Speak Arabic text via the browser's built-in SpeechSynthesis API.
  * Phase 1 TTS — swap for a hosted TTS provider when available.
  */
-export const speakArabic = (text: string, onEnd?: () => void): SpeechSynthesisUtterance | null => {
+export const speakArabic = (
+  text: string,
+  opts: { female?: boolean; onEnd?: () => void } = {},
+): SpeechSynthesisUtterance | null => {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-    onEnd?.();
+    opts.onEnd?.();
     return null;
   }
   try {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    // Try to find an Arabic voice
     const voices = window.speechSynthesis.getVoices();
-    const arVoice =
-      voices.find((v) => v.lang?.toLowerCase().startsWith("ar")) ||
-      voices.find((v) => /arab/i.test(v.name));
-    if (arVoice) u.voice = arVoice;
-    u.lang = arVoice?.lang || "ar-SA";
-    u.rate = 0.95;
-    u.pitch = 1.0;
-    if (onEnd) u.onend = () => onEnd();
+    const arVoices = voices.filter((v) => v.lang?.toLowerCase().startsWith("ar"));
+    let chosen: SpeechSynthesisVoice | undefined;
+    if (opts.female) {
+      chosen =
+        arVoices.find((v) => /female|woman|girl|hala|amira|laila|sara/i.test(v.name)) ||
+        arVoices[0];
+    } else {
+      chosen =
+        arVoices.find((v) => /male|man|hamed|tarek|maged|salim/i.test(v.name)) ||
+        arVoices[0];
+    }
+    if (chosen) u.voice = chosen;
+    u.lang = chosen?.lang || "ar-SA";
+    u.rate = opts.female ? 0.92 : 0.95;
+    u.pitch = opts.female ? 1.15 : 0.95;
+    if (opts.onEnd) u.onend = () => opts.onEnd?.();
     window.speechSynthesis.speak(u);
     return u;
   } catch {
-    onEnd?.();
+    opts.onEnd?.();
     return null;
   }
 };

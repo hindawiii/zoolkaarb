@@ -190,11 +190,19 @@ const FakeCallIncoming = () => {
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center px-6">
-          <div
-            className={`w-32 h-32 rounded-full ${AVATAR_GRADIENT[cfg.avatar]} flex items-center justify-center text-5xl font-bold shadow-2xl mb-6`}
-          >
-            {initial}
-          </div>
+          {cfg.photoDataUrl ? (
+            <img
+              src={cfg.photoDataUrl}
+              alt=""
+              className="w-32 h-32 rounded-full object-cover ring-2 ring-white/30 shadow-2xl mb-6"
+            />
+          ) : (
+            <div
+              className={`w-32 h-32 rounded-full ${AVATAR_GRADIENT[cfg.avatar]} flex items-center justify-center text-5xl font-bold shadow-2xl mb-6`}
+            >
+              {initial}
+            </div>
+          )}
           <p className="text-2xl font-bold font-cairo">{cfg.callerName}</p>
           <p className="text-sm text-white/60 font-cairo mt-1">{cfg.callerLabel}</p>
           <p className="mt-4 text-base font-mono text-white/80">{formatTimer(timer)}</p>

@@ -4,6 +4,7 @@
 let ctx: AudioContext | null = null;
 let timerId: number | null = null;
 let activeNodes: AudioNode[] = [];
+let customAudio: HTMLAudioElement | null = null;
 
 const ensureCtx = () => {
   if (!ctx) ctx = new (window.AudioContext || (window as any).webkitAudioContext)();

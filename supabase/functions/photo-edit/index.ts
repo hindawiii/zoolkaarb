@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { imageBase64, images, action } = await req.json();
+    const { imageBase64, images, action, anime } = await req.json();
     const imageList: string[] = Array.isArray(images) && images.length > 0
       ? images
       : imageBase64
@@ -99,7 +99,10 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const prompt = PROMPTS[action];
+    let prompt: string | undefined = PROMPTS[action];
+    if (action === "anime-studio") {
+      prompt = buildAnimePrompt(anime ?? {});
+    }
     if (!prompt) {
       return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
         status: 400,

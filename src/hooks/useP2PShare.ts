@@ -3,14 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 /**
- * WebRTC P2P file share with Supabase Realtime as the tiny signaling channel.
- * - ~2KB of SDP/ICE flows through Realtime.
- * - Actual file bytes flow device-to-device over a DataChannel.
- * - On the same Wi-Fi/LAN, ICE picks the local candidate → zero internet data for the file.
- * - If only remote candidates work (different networks), it still goes P2P (no file ever hits our cloud).
+ * Symmetric WebRTC P2P file share with Supabase Realtime as a tiny signaling channel.
+ * - "host" generates the 6-digit code/QR and waits.
+ * - "join" enters/scans the code to connect.
+ * - DataChannel is negotiated (id 0), so EITHER party can send a file once connected.
+ * - On the same Wi-Fi/LAN, ICE picks the local candidate → zero internet data for the file bytes.
  */
 
-export type P2PRole = "sender" | "receiver";
+export type P2PMode = "host" | "join";
 export type P2PStatus =
   | "idle"
   | "waiting"
@@ -32,7 +32,7 @@ const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun1.l.google.com:19302" },
 ];
 
-const CHUNK_SIZE = 16 * 1024; // 16KB chunks for DataChannel
+const CHUNK_SIZE = 16 * 1024;
 const BUFFER_LOW = 256 * 1024;
 const BUFFER_HIGH = 1024 * 1024;
 
@@ -51,26 +51,16 @@ export function useP2PShare() {
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const roleRef = useRef<P2PRole | null>(null);
+  const modeRef = useRef<P2PMode | null>(null);
 
   const incomingChunksRef = useRef<ArrayBuffer[]>([]);
   const incomingMetaRef = useRef<IncomingFileMeta | null>(null);
   const incomingReceivedRef = useRef(0);
 
   const cleanup = useCallback(() => {
-    try {
-      dcRef.current?.close();
-    } catch (_e) {
-      /* noop */
-    }
-    try {
-      pcRef.current?.close();
-    } catch (_e) {
-      /* noop */
-    }
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-    }
+    try { dcRef.current?.close(); } catch (_e) { /* noop */ }
+    try { pcRef.current?.close(); } catch (_e) { /* noop */ }
+    if (channelRef.current) supabase.removeChannel(channelRef.current);
     dcRef.current = null;
     pcRef.current = null;
     channelRef.current = null;
@@ -91,7 +81,7 @@ export function useP2PShare() {
     setReceivedUrl(null);
     setReceivedName("");
     setUsingLocalCandidate(null);
-    roleRef.current = null;
+    modeRef.current = null;
   }, [cleanup]);
 
   const inspectSelectedCandidate = useCallback(async () => {
@@ -110,12 +100,10 @@ export function useP2PShare() {
           });
         }
       });
-    } catch (_e) {
-      /* noop */
-    }
+    } catch (_e) { /* noop */ }
   }, []);
 
-  const handleDataChannel = useCallback(
+  const wireDataChannel = useCallback(
     (dc: RTCDataChannel) => {
       dc.binaryType = "arraybuffer";
       dc.bufferedAmountLowThreshold = BUFFER_LOW;
@@ -150,9 +138,7 @@ export function useP2PShare() {
                 setStatus("done");
               }
             }
-          } catch (_e) {
-            /* noop */
-          }
+          } catch (_e) { /* noop */ }
         } else {
           const buf = ev.data as ArrayBuffer;
           incomingChunksRef.current.push(buf);
@@ -168,25 +154,21 @@ export function useP2PShare() {
   );
 
   const setupSignaling = useCallback(
-    (pairCode: string, role: P2PRole, onRemoteSdp: (sdp: RTCSessionDescriptionInit) => void) => {
+    (pairCode: string, self: P2PMode, onRemoteSdp: (sdp: RTCSessionDescriptionInit) => void) => {
       const channel = supabase.channel(`p2p:${pairCode}`, {
         config: { broadcast: { self: false, ack: false } },
       });
 
       channel
         .on("broadcast", { event: "sdp" }, ({ payload }) => {
-          if (payload?.from === role) return;
+          if (payload?.from === self) return;
           onRemoteSdp(payload.sdp as RTCSessionDescriptionInit);
         })
         .on("broadcast", { event: "ice" }, async ({ payload }) => {
-          if (payload?.from === role) return;
+          if (payload?.from === self) return;
           const pc = pcRef.current;
           if (pc && payload?.candidate) {
-            try {
-              await pc.addIceCandidate(payload.candidate);
-            } catch (_e) {
-              /* noop */
-            }
+            try { await pc.addIceCandidate(payload.candidate); } catch (_e) { /* noop */ }
           }
         })
         .subscribe();
@@ -197,25 +179,27 @@ export function useP2PShare() {
     [],
   );
 
-  const startSender = useCallback(async () => {
+  /** HOST: generate code, create offer, wait for joiner's answer. Returns the code. */
+  const startHost = useCallback(async (): Promise<string> => {
     reset();
-    roleRef.current = "sender";
+    modeRef.current = "host";
     const pairCode = generateCode();
     setCode(pairCode);
     setStatus("waiting");
 
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
     pcRef.current = pc;
-    const dc = pc.createDataChannel("file", { ordered: true });
+    // Negotiated DataChannel — both peers create with same id.
+    const dc = pc.createDataChannel("file", { negotiated: true, id: 0, ordered: true });
     dcRef.current = dc;
-    handleDataChannel(dc);
+    wireDataChannel(dc);
 
     pc.onicecandidate = (ev) => {
       if (ev.candidate && channelRef.current) {
         channelRef.current.send({
           type: "broadcast",
           event: "ice",
-          payload: { from: "sender", candidate: ev.candidate.toJSON() },
+          payload: { from: "host", candidate: ev.candidate.toJSON() },
         });
       }
     };
@@ -230,25 +214,15 @@ export function useP2PShare() {
       }
     };
 
-    const channel = setupSignaling(pairCode, "sender", async (sdp) => {
-      try {
-        await pc.setRemoteDescription(sdp);
-      } catch (e) {
-        setError((e as Error).message);
-        setStatus("error");
-      }
+    const channel = setupSignaling(pairCode, "host", async (sdp) => {
+      try { await pc.setRemoteDescription(sdp); }
+      catch (e) { setError((e as Error).message); setStatus("error"); }
     });
 
-    // Wait until subscribed, then create offer
-    const waitSubscribed = () =>
-      new Promise<void>((resolve) => {
-        const check = () => {
-          if (channel.state === "joined") resolve();
-          else setTimeout(check, 100);
-        };
-        check();
-      });
-    await waitSubscribed();
+    await new Promise<void>((resolve) => {
+      const check = () => (channel.state === "joined" ? resolve() : setTimeout(check, 100));
+      check();
+    });
 
     setStatus("connecting");
     const offer = await pc.createOffer();
@@ -256,32 +230,32 @@ export function useP2PShare() {
     channel.send({
       type: "broadcast",
       event: "sdp",
-      payload: { from: "sender", sdp: pc.localDescription },
+      payload: { from: "host", sdp: pc.localDescription },
     });
 
     return pairCode;
-  }, [handleDataChannel, inspectSelectedCandidate, reset, setupSignaling]);
+  }, [inspectSelectedCandidate, reset, setupSignaling, wireDataChannel]);
 
-  const startReceiver = useCallback(
+  /** JOIN: with a 6-digit code, answer the host's offer. */
+  const startJoin = useCallback(
     async (pairCode: string) => {
       reset();
-      roleRef.current = "receiver";
+      modeRef.current = "join";
       setCode(pairCode);
       setStatus("connecting");
 
       const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
       pcRef.current = pc;
+      const dc = pc.createDataChannel("file", { negotiated: true, id: 0, ordered: true });
+      dcRef.current = dc;
+      wireDataChannel(dc);
 
-      pc.ondatachannel = (ev) => {
-        dcRef.current = ev.channel;
-        handleDataChannel(ev.channel);
-      };
       pc.onicecandidate = (ev) => {
         if (ev.candidate && channelRef.current) {
           channelRef.current.send({
             type: "broadcast",
             event: "ice",
-            payload: { from: "receiver", candidate: ev.candidate.toJSON() },
+            payload: { from: "join", candidate: ev.candidate.toJSON() },
           });
         }
       };
@@ -292,7 +266,7 @@ export function useP2PShare() {
         }
       };
 
-      setupSignaling(pairCode, "receiver", async (sdp) => {
+      setupSignaling(pairCode, "join", async (sdp) => {
         try {
           await pc.setRemoteDescription(sdp);
           const answer = await pc.createAnswer();
@@ -300,7 +274,7 @@ export function useP2PShare() {
           channelRef.current?.send({
             type: "broadcast",
             event: "sdp",
-            payload: { from: "receiver", sdp: pc.localDescription },
+            payload: { from: "join", sdp: pc.localDescription },
           });
         } catch (e) {
           setError((e as Error).message);
@@ -308,7 +282,7 @@ export function useP2PShare() {
         }
       });
     },
-    [handleDataChannel, reset, setupSignaling],
+    [reset, setupSignaling, wireDataChannel],
   );
 
   const sendFile = useCallback(async (file: File) => {
@@ -324,7 +298,6 @@ export function useP2PShare() {
 
     let offset = 0;
     const reader = file.stream().getReader();
-
     const waitForBuffer = () =>
       new Promise<void>((resolve) => {
         if (dc.bufferedAmount < BUFFER_HIGH) return resolve();
@@ -363,9 +336,12 @@ export function useP2PShare() {
     receivedUrl,
     receivedName,
     usingLocalCandidate,
-    startSender,
-    startReceiver,
+    startHost,
+    startJoin,
     sendFile,
     reset,
+    // Back-compat aliases (used elsewhere if any)
+    startSender: startHost,
+    startReceiver: startJoin,
   };
 }

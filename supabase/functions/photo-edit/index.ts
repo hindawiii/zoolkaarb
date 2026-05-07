@@ -35,11 +35,59 @@ const PROMPTS: Record<string, string> = {
     "Create a side-by-side VS battle composition from the two provided images. Place them on left and right halves with a dramatic golden divider. Match lighting and add a cinematic dark vignette. Leave clear empty space in the center for a VS badge overlay.",
 };
 
+// ===== Anime Transformation Studio (ControlNet/LoRA-style prompt composer) =====
+const STYLE_PROMPTS: Record<string, string> = {
+  dbz: "Akira Toriyama Dragon Ball Z / Super shonen anime style: bold thick black inking, cel-shaded primary colors, hyper-defined muscular anatomy, sharp angular jawlines, large expressive determined eyes, dramatic speed-line backgrounds.",
+  naruto: "Masashi Kishimoto Naruto Shippuden style: clean cel-shaded line art, slightly muted earthy palette, sharp shonen facial geometry, ninja-headband-friendly composition, dynamic shinobi posture.",
+  "one-piece": "Eiichiro Oda One Piece style: exaggerated proportions, expressive cartoon-leaning faces, bold inking, vibrant tropical adventure palette, pirate-era ambience.",
+  hxh: "Yoshihiro Togashi Hunter x Hunter style: refined detailed line art, painterly soft cel-shading, rich saturated highlights, mature shonen character design.",
+  conan: "Gosho Aoyama Detective Conan style: classic 90s shonen mystery look, cleaner softer line art, realistic proportions, urban detective ambience.",
+};
+const HERO_PROMPTS: Record<string, string> = {
+  goku: "Force the identity of Son Goku from Dragon Ball Z: signature spiky black (or golden Super Saiyan) upright spiky hair, orange gi with blue undershirt and belt, Kanji symbol on chest, confident grin.",
+  naruto: "Force the identity of Naruto Uzumaki: bright spiky blond hair, blue eyes, three whisker marks on each cheek, orange and black tracksuit jacket, Konoha forehead protector.",
+  luffy: "Force the identity of Monkey D. Luffy: messy black hair under iconic straw hat with red ribbon, scar under left eye, red open vest, blue shorts, wide carefree smile.",
+};
+const AURA_PROMPTS: Record<string, string> = {
+  kaio: "Add an explosive Dragon Ball Ki aura: blazing golden-white energy bursting from the torso outward, lightning sparks, ground debris floating upward, intense rim light on the subject.",
+  chakra: "Add a swirling blue Naruto Chakra aura around the torso: translucent flowing energy ribbons, soft cyan glow, faint kanji-like sigils.",
+  nen: "Add a Hunter x Hunter Nen aura: dense controlled energy outline hugging the body, subtle multicolor shimmer, focused intense vibe.",
+  haki: "Add a One Piece Conqueror's Haki aura: dark purple-black smoky energy radiating from the torso with crackling lightning, oppressive overpowering atmosphere.",
+};
+const HAIR_PROMPTS: Record<string, string> = {
+  spiky: "Transform hair into Dragon Ball-style upright spiky shonen hair, sharp gravity-defying spikes, bold inking.",
+  "ssj-gold": "Transform hair into Super Saiyan golden upright flame-shaped spiky hair, glowing yellow.",
+  keep: "Keep the original hairstyle but redrawn in the chosen anime style.",
+};
+const PROP_PROMPTS: Record<string, string> = {
+  none: "",
+  saber: "Place a glowing energy saber-style sword held firmly in the subject's hand, matching the detected hand position, with bright blade glow casting light on the face.",
+  rasengan: "Place a swirling blue Rasengan energy sphere held in the subject's open palm, matching the detected hand position, with cyan rim light on the hand and face.",
+  staff: "Place a mystical shonen battle staff in the subject's hand, with subtle glowing runes.",
+};
+
+const buildAnimePrompt = (p: {
+  style?: string; hero?: string; aura?: string; hair?: string; prop?: string;
+}) => {
+  const parts = [
+    "Transform the person in this photo into a high-fidelity Japanese Shonen anime illustration.",
+    "Strictly preserve the subject's base pose, head tilt, facial expression, and any headphones or eyewear they are wearing.",
+    "Preserve recognizable facial identity (eyes shape, face structure) while restyling.",
+    STYLE_PROMPTS[p.style ?? ""] ?? STYLE_PROMPTS["dbz"],
+    p.hero && HERO_PROMPTS[p.hero] ? HERO_PROMPTS[p.hero] : "",
+    p.hair && HAIR_PROMPTS[p.hair] ? HAIR_PROMPTS[p.hair] : "",
+    p.aura && AURA_PROMPTS[p.aura] ? AURA_PROMPTS[p.aura] : "",
+    p.prop && PROP_PROMPTS[p.prop] ? PROP_PROMPTS[p.prop] : "",
+    "Zero tolerance for generic 'anime filter' look. Output a clean, professional, publishable Shonen anime illustration with crisp inking, cel shading, dynamic composition, and accurate hero-specific styling.",
+  ].filter(Boolean);
+  return parts.join(" ");
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { imageBase64, images, action } = await req.json();
+    const { imageBase64, images, action, anime } = await req.json();
     const imageList: string[] = Array.isArray(images) && images.length > 0
       ? images
       : imageBase64
@@ -51,7 +99,10 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const prompt = PROMPTS[action];
+    let prompt: string | undefined = PROMPTS[action];
+    if (action === "anime-studio") {
+      prompt = buildAnimePrompt(anime ?? {});
+    }
     if (!prompt) {
       return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
         status: 400,
